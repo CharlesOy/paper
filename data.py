@@ -4,7 +4,9 @@ import numpy as np
 import pandas as pd
 
 # 数据维度
-class_length = 6
+class_length = 30
+# 每一维数据的长度
+length = 10
 # 列名
 columns = ['ResponseTime', 'Cost', 'Availability', 'Reliability', 'Reputation']
 
@@ -77,5 +79,5 @@ def dt_path(i):
 if __name__ == '__main__':
     for j in range(class_length):
         path = dt_path(j)
-        simulation_data = generate_df(_length=20)
+        simulation_data = generate_df(_length=length)
         simulation_data.to_csv(path)

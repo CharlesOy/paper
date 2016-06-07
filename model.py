@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+import math
 import numpy as np
 import pandas as pd
+import operator
 import data
 
 
@@ -86,7 +88,8 @@ def qos_total(matrix_data, gene):
 
 def best_qos(matrix_data):
     """
-    获取最佳服务质量及其解
+    获取最佳服务质量及其解,
+    本函数采用穷举法,及其消耗时间
     :param matrix_data:
     :return:
     """
@@ -195,16 +198,16 @@ def genetic_optimize(matrix_data, adaptive_function, mutate_prob=0.2, population
     # 主循环迭代
     for i in range(max_iter):
         # 获取种群中所有基因的适应度和基因的元组
-        scores = [(adaptive_function(matrix_data, gene), gene) for gene in population]
-        scores.sort(reverse=True)
-        print(scores[0])
+        scores = [(gene, adaptive_function(matrix_data, gene)) for gene in population]
+        scores.sort(reverse=True, key=operator.itemgetter(1))
+        print(scores[0], i + 1)
         # print(str(i) + '-------------------')
         # for score in scores:
         #     print(score)
 
-        ranked_population = [g for (s, g) in scores]
+        ranked_population = [g for (g, s) in scores]
 
-        # 获取精英基因,淘汰劣质基因
+        # 获取精英基因,淘汰劣质染色体
         population = ranked_population[:top_elite_count]
 
         while len(population) < population_size:
@@ -218,8 +221,141 @@ def genetic_optimize(matrix_data, adaptive_function, mutate_prob=0.2, population
                 k = np.random.randint(0, top_elite_count)
                 population.append(cross_over(ranked_population[i], ranked_population[k]))
 
-    # 返回收敛后的解元组(适应度,基因)
+    # 返回收敛后的解元组(适应度,染色体)
     return scores[0]
+
+
+def random_optimize(matrix_data, adaptive_function, times):
+    """
+    随机搜索算法
+    :param matrix_data:
+    :param adaptive_function:
+    :param times:
+    :return:
+    """
+    vec = []
+    for i in range(len(matrix_data)):
+        vec.append(0)
+    v_best = adaptive_function(matrix_data, vec)
+    chromosome_best = vec[:]
+    # 获取随机点
+    population = generate_population(matrix_data, times)
+    for chromosome in population:
+        v_cur = adaptive_function(matrix_data, chromosome)
+        if v_best < v_cur:
+            v_best = v_cur
+            chromosome_best = chromosome[:]
+    return chromosome_best, v_best
+
+
+def hill_climbing(matrix_data, adaptive_function, vec):
+    """
+    爬山算法
+    :param matrix_data:
+    :param adaptive_function:
+    :param vec:
+    :return:
+    """
+    while True:
+        neighbours = []
+        for i in range(len(vec)):
+            if vec[i] + 1 < matrix_data[i].shape[0]:
+                neighbours.append(vec[:i] + [vec[i] + 1] + vec[i + 1:])
+            if vec[i] - 1 > 0:
+                neighbours.append(vec[:i] + [vec[i] - 1] + vec[i + 1:])
+        v_best = adaptive_function(matrix_data, vec)
+        # vec_best = vec
+        for neighbour in neighbours:
+            v_cur = adaptive_function(matrix_data, neighbour)
+            if v_best < v_cur:
+                v_best = v_cur
+                # vec_best = neighbour
+        return v_best
+
+
+def random_hill_climbing(matrix_data, adaptive_function, times, step=1):
+    """
+    随机重复爬山算法
+    :param matrix_data:
+    :param adaptive_function:
+    :param times:
+    :return:
+    """
+    # 获取初始随机点
+    population = generate_population(matrix_data, times)
+    best_chromosome = []
+    for i in range(len(matrix_data)):
+        best_chromosome.append(0)
+    best_value = adaptive_function(matrix_data, best_chromosome)
+    for chromosome in population:
+        cur_value = hill_climbing(matrix_data, adaptive_function, chromosome)
+        if cur_value > best_value:
+            best_value = cur_value
+            best_chromosome = chromosome
+    return best_chromosome, best_value
+
+
+def simulated_annealing(matrix_data, adaptive_function, temperature=10000, t_threshold=0.1, cooling_rate=0.1, step=1):
+    """
+    模拟退火算法
+    :param matrix_data:
+    :param adaptive_function:
+    :param temperature:
+    :param t_threshold:
+    :param cooling_rate:
+    :param step:
+    :return:
+    """
+    vec = generate_population(matrix_data, 1)[0]
+    v_origin = 0
+    while temperature > t_threshold:
+        # 选择一个索引位置
+        i = np.random.randint(0, len(vec) - 1)
+        # 选择一个改变索引的方向
+        direction = np.random.randint(-step, step)
+        # 创建新解
+        vec_b = vec[:]
+        if vec_b[i] + direction >= matrix_data[i].shape[0]:
+            vec_b[i] = matrix_data[i].shape[0]
+        elif vec_b[i] + direction < 0:
+            vec_b[i] = 0
+        else:
+            vec_b[i] += direction
+
+        # 当前解的目标函数
+        v_origin = adaptive_function(matrix_data, vec)
+        # 新解的目标函数
+        v_b = adaptive_function(matrix_data, vec_b)
+
+        # 接受更好的解,或者温度高时有一定概率接受更差的解
+        if v_origin < v_b or np.random.random() < pow(math.e, -(v_b - v_origin) / temperature):
+            vec = vec_b
+
+        # 降温
+        temperature *= cooling_rate
+    return vec, v_origin
+
+
+def random_sa(matrix_data, adaptive_function, times=1000, temperature=10000, t_threshold=0.1, cooling_rate=0.1, step=1):
+    """
+    随机重复模拟退火算法
+    :param matrix_data:
+    :param adaptive_function:
+    :param times:
+    :param temperature:
+    :param t_threshold:
+    :param cooling_rate:
+    :param step:
+    :return:
+    """
+    result = (None, 0)
+    if times <= 0:
+        times = 1000
+    for i in range(times):
+        cur_result = simulated_annealing(matrix_data, adaptive_function, temperature, t_threshold, cooling_rate, step)
+        if cur_result[1] > result[1]:
+            result = cur_result
+    return result
 
 
 def generate_population(matrix_data, population_size):
@@ -251,7 +387,21 @@ if __name__ == '__main__':
 
     # print(best_qos(simulation_data))
 
-    genetic_optimize(simulation_data, qos_total, max_iter=10, mutate_prob=0.95, step=5)
+    # print('generic algorithm')
+    # genetic_optimize(simulation_data, qos_total, max_iter=100, population_size=1000,
+    #                  mutate_prob=0.95, step=4)
+
+    # print('random search')
+    # print(random_optimize(simulation_data, qos_total, 10000))
+
+    # print('random restart hill climbing')
+    # print(random_hill_climbing(simulation_data, qos_total, 10000))
+
+    # print('simulated annealing')
+    # print(simulated_annealing(simulation_data, qos_total))
+
+    print('random restart simulated annealing')
+    print(random_sa(simulation_data, qos_total))
 
     # test_gene = [4, 14, 18, 6, 12, 7]
     # print(qos_time(simulation_data, test_gene))
