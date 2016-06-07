@@ -5,12 +5,18 @@ import pandas as pd
 
 
 def base_data():
-    """根据基本数据特征生成实验数据"""
-    return pd.read_csv('data.txt', header=None)
+    """
+    获取真实数据作为基本数据
+    """
+    return pd.read_csv('data/base.data', header=None)
 
 
 def generate_df(_length=100):
-    """生成服从正态分布的数据"""
+    """
+    生成服从正态分布的数据,
+    并写入文件
+    """
+    # 列名
     columns = ['ResponseTime', 'Throughput', 'Reliability', 'BestPractices', 'Documentation']
 
     df = base_data()
@@ -23,7 +29,10 @@ def generate_df(_length=100):
 
     df_result = pd.concat(data, axis=1)
     df_result.columns = columns
+
+    df_result.to_csv('data/simulation.data')
+
     return df_result
 
 
-print(generate_df())
+print(generate_df(_length=1000))
