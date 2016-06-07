@@ -50,26 +50,18 @@ def normalize(df):
     :return:
     """
     for i in range(len(columns)):
-        # 响应时间和花费是越少越好,这里将其处理成原始数据越小,归一化之后的数据越大,便于后续处理
         if i == 0 or i == 1:
+            # 响应时间和花费是越少越好,这里将其处理成原始数据越小,归一化之后的数据越大,便于后续处理
             df[columns[i]] = np.round(
                 (df[columns[i]].max() - df[columns[i]]) / (df[columns[i]].max() - df[columns[i]].min()), 2)
-        # 可用性,可靠性,名誉度归一化等比例放缩
-        else:
+        elif i == 4:
+            # 名誉度正常归一化处理
             df[columns[i]] = np.round(
                 (df[columns[i]] - df[columns[i]].min()) / (df[columns[i]].max() - df[columns[i]].min()), 2)
-
-
-def denoise(df, threshold=3):
-    """正态分布去噪"""
-    for i in range(df.shape[1]):
-        if i > 2:
-            break
-        sigma = math.sqrt(df[columns[i]].describe()['std'])
-        mu = df[columns[i]].describe()['mean']
-        print(df[np.abs(df[columns[i]] - mu) > threshold * sigma])
-        df[columns[i]][np.abs(df[columns[i]] - mu) > threshold * sigma] = None
-        return df
+        else:
+            # 可用性,可靠性归一化等比例放缩,最小值为0.5,最大值为1
+            df[columns[i]] = np.round(((df[columns[i]] - df[columns[i]].min()) / (
+                df[columns[i]].max() - df[columns[i]].min())) / 2 + 0.5, 2)
 
 
 def dt_path(i):
