@@ -258,11 +258,11 @@ def hill_climbing(matrix_data, adaptive_function, vec):
     """
     while True:
         neighbours = []
-        for i in range(len(vec)):
-            if vec[i] + 1 < matrix_data[i].shape[0]:
-                neighbours.append(vec[:i] + [vec[i] + 1] + vec[i + 1:])
-            if vec[i] - 1 > 0:
-                neighbours.append(vec[:i] + [vec[i] - 1] + vec[i + 1:])
+        for k in range(len(vec)):
+            if vec[k] + 1 < matrix_data[k].shape[0]:
+                neighbours.append(vec[:k] + [vec[k] + 1] + vec[k + 1:])
+            if vec[k] - 1 > 0:
+                neighbours.append(vec[:k] + [vec[k] - 1] + vec[k + 1:])
         v_best = adaptive_function(matrix_data, vec)
         # vec_best = vec
         for neighbour in neighbours:
@@ -358,6 +358,149 @@ def random_sa(matrix_data, adaptive_function, times=1000, temperature=10000, t_t
     return result
 
 
+def particle_swarm_optimize(matrix_data, adaptive_function, max_iter=100, population_size=100, weight=0.8, c1=2, c2=2):
+    """
+    一种改进的粒子群优化算法
+    :param matrix_data:
+    :param adaptive_function:
+    :param max_iter:
+    :param population_size:
+    :param weight:
+    :param c1:
+    :param c2:
+    :return:
+    """
+    # 粒子群
+    population = generate_population(matrix_data, population_size)
+    # 随机速度
+    speeds = generate_population(matrix_data, population_size)
+    # 每个粒子的最佳纪录
+    best_histories = []
+    # 粒子群的最佳纪录
+    best_of_all = (None, 0)
+    # 初始化每个粒子的最佳纪录
+    for chromosome in population:
+        value_cur = adaptive_function(matrix_data, chromosome)
+        best_histories.append((chromosome, value_cur))
+        if value_cur > best_of_all[1]:
+            best_of_all = (chromosome, value_cur)
+    # 主循环
+    for i in range(max_iter):
+        print(best_of_all, i)
+        # print(best_histories[0])
+        # print(population[0])
+        # print(speeds[0])
+        # print('')
+        for k in range(len(population)):
+            chromosome = population[k]
+            speed = speeds[k]
+            for m in range(len(chromosome)):
+                # 计算速度
+                speed[m] *= speed[m] * weight
+                speed[m] += c1 * np.random.random() * (best_histories[k][0][m] - chromosome[m])
+                speed[m] += c2 * np.random.random() * (best_of_all[0][m] - chromosome[m])
+                speed[m] = int(round(speed[m])) % matrix_data[m].shape[0]
+                # 计算新的位置
+                chromosome[m] += speed[m]
+                chromosome[m] %= matrix_data[m].shape[0]
+
+                # if chromosome[m] + speed[m] >= matrix_data[m].shape[0]:
+                #     chromosome[m] = matrix_data[m].shape[0] - 1
+                # elif chromosome[m] + speed[m] < 0:
+                #     chromosome[m] = 0
+                # else:
+                #     chromosome[m] += speed[m]
+            value_cur = adaptive_function(matrix_data, chromosome)
+            if value_cur > best_histories[k][1]:
+                best_histories[k] = (chromosome, value_cur)
+            if value_cur > best_of_all[1]:
+                # print('updated')
+                best_of_all = (chromosome[:], value_cur)
+
+    return best_of_all
+
+
+def improved_ga(matrix_data, adaptive_function, mutate_prob=0.2, population_size=100, step=1, elite_rate=0.2,
+                max_iter=100):
+    """
+    变异算子经过改进的遗传算法,
+    采用选择算子采用排序法,
+    变异算子,
+    交叉算子采用随机交叉
+    :param matrix_data:
+    :param adaptive_function:
+    :param mutate_prob:
+    :param population_size:
+    :param step:
+    :param elite_rate:
+    :param max_iter:
+    :return:
+    """
+
+    def mutate(vec):
+        """
+        改进过的变异算子,
+        随机基因位置,
+        确定该基因最合适编码
+        :param vec:
+        :return:
+        """
+        m = np.random.randint(0, len(matrix_data))
+        best_gene = 0
+        best_v = 0
+        for index in range(0, matrix_data[m].shape[0]):
+            cur_v = adaptive_function(matrix_data, vec[0:m] + [index] + vec[m + 1:])
+            if cur_v > best_v:
+                best_v = cur_v
+                best_gene = vec[0:m] + [index] + vec[m + 1:]
+        return best_gene
+
+    def cross_over(r1, r2):
+        """
+        交叉算子
+        :param r1:
+        :param r2:
+        :return:
+        """
+        m = np.random.randint(1, len(r1) - 2)
+        return r1[:m] + r2[m:]
+
+    # 随机生成初始种群
+    population = generate_population(matrix_data, population_size)
+
+    # 精英数
+    top_elite_count = int(elite_rate * population_size)
+
+    # 主循环迭代
+    for i in range(max_iter):
+        # 获取种群中所有基因的适应度和基因的元组
+        scores = [(gene, adaptive_function(matrix_data, gene)) for gene in population]
+        scores.sort(reverse=True, key=operator.itemgetter(1))
+        print(scores[0], i + 1)
+        # print(str(i) + '-------------------')
+        # for score in scores:
+        #     print(score)
+
+        ranked_population = [g for (g, s) in scores]
+
+        # 获取精英基因,淘汰劣质染色体
+        population = ranked_population[:top_elite_count]
+
+        while len(population) < population_size:
+            if np.random.random() < mutate_prob:
+                # 变异
+                i = np.random.randint(0, top_elite_count)
+                population.append(mutate(ranked_population[i]))
+            else:
+                # 交叉
+                i = np.random.randint(0, top_elite_count)
+                k = np.random.randint(0, top_elite_count)
+                population.append(cross_over(ranked_population[i], ranked_population[k]))
+
+    # 返回收敛后的解元组(适应度,染色体)
+    return scores[0]
+
+
 def generate_population(matrix_data, population_size):
     """
     生成初始种群,
@@ -388,9 +531,12 @@ if __name__ == '__main__':
     # print(best_qos(simulation_data))
 
     # print('generic algorithm')
-    # genetic_optimize(simulation_data, qos_total, max_iter=100, population_size=1000,
+    # genetic_optimize(simulation_data, qos_total, max_iter=100, population_size=200,
     #                  mutate_prob=0.95, step=4)
 
+    print('improved generic algorithm')
+    improved_ga(simulation_data, qos_total, max_iter=30, population_size=200,
+                mutate_prob=0.95, step=4)
     # print('random search')
     # print(random_optimize(simulation_data, qos_total, 10000))
 
@@ -400,8 +546,11 @@ if __name__ == '__main__':
     # print('simulated annealing')
     # print(simulated_annealing(simulation_data, qos_total))
 
-    print('random restart simulated annealing')
-    print(random_sa(simulation_data, qos_total))
+    # print('random restart simulated annealing')
+    # print(random_sa(simulation_data, qos_total, times=5000))
+
+    # print('particle swarm optimization')
+    # print(particle_swarm_optimize(simulation_data, qos_total, max_iter=500, population_size=100))
 
     # test_gene = [4, 14, 18, 6, 12, 7]
     # print(qos_time(simulation_data, test_gene))
