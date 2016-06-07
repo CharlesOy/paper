@@ -393,7 +393,7 @@ if __name__ == '__main__':
 
     # print('random search')
     # print(random_optimize(simulation_data, qos_total, 10000))
-ß
+
     # print('random restart hill climbing')
     # print(random_hill_climbing(simulation_data, qos_total, 10000))
 
