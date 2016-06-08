@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import time
 import math
 import numpy as np
 import pandas as pd
@@ -78,10 +79,10 @@ def qos_total(matrix_data, gene):
     :param gene:
     :return:
     """
-    result = 0.2 * qos_time(matrix_data, gene)
-    result += 0.2 * qos_cost(matrix_data, gene)
-    result += 0.2 * qos_availability(matrix_data, gene)
-    result += 0.2 * qos_reliability(matrix_data, gene)
+    result = 0.1 * qos_time(matrix_data, gene)
+    result += 0.1 * qos_cost(matrix_data, gene)
+    result += 0.3 * qos_availability(matrix_data, gene)
+    result += 0.3 * qos_reliability(matrix_data, gene)
     result += 0.2 * qos_reputation(matrix_data, gene)
     return result
 
@@ -142,7 +143,7 @@ def best_qos(matrix_data):
     return vec_best, adaption_best
 
 
-def genetic_optimize(matrix_data, adaptive_function, mutate_prob=0.2, population_size=100, step=1, elite_rate=0.2,
+def genetic_optimize(matrix_data, adaptive_function, mutate_prob=0.2, step=1, elite_rate=0.2,
                      max_iter=100):
     """
     经典遗传算法,
@@ -152,7 +153,6 @@ def genetic_optimize(matrix_data, adaptive_function, mutate_prob=0.2, population
     :param matrix_data:
     :param adaptive_function:
     :param mutate_prob:
-    :param population_size:
     :param step:
     :param elite_rate:
     :param max_iter:
@@ -165,19 +165,19 @@ def genetic_optimize(matrix_data, adaptive_function, mutate_prob=0.2, population
         :param vec:
         :return:
         """
-        i = np.random.randint(0, len(matrix_data))
+        m = np.random.randint(0, len(matrix_data))
         if np.random.random() < 0.5:
             # 染色体变异位置超过下限
-            if vec[i] - step < 0:
-                return vec[0:i] + [0] + vec[i + 1:]
+            if vec[m] - step < 0:
+                return vec[0:m] + [0] + vec[m + 1:]
             # 向下变异,移动step个单位
-            return vec[0:i] + [vec[i] - step] + vec[i + 1:]
+            return vec[0:m] + [vec[m] - step] + vec[m + 1:]
         else:
             # 染色体变异位置超过上限
-            if vec[i] + step >= matrix_data[i].shape[0]:
-                return vec[0:i] + [matrix_data[i].shape[0] - 1] + vec[i + 1:]
+            if vec[m] + step >= matrix_data[m].shape[0]:
+                return vec[0:m] + [matrix_data[m].shape[0] - 1] + vec[m + 1:]
             # 向上变异,移动step个单位
-            return vec[0:i] + [vec[i] + step] + vec[i + 1:]
+            return vec[0:m] + [vec[m] + step] + vec[m + 1:]
 
     def cross_over(r1, r2):
         """
@@ -189,18 +189,26 @@ def genetic_optimize(matrix_data, adaptive_function, mutate_prob=0.2, population
         m = np.random.randint(1, len(r1) - 2)
         return r1[:m] + r2[m:]
 
+    # 记录算法开始时间戳
+    t_begin = time.time()
+    # 记录迭代过程
+    procedure = []
+
     # 随机生成初始种群
-    population = generate_population(matrix_data, population_size)
+    population = data.get_population()
+    population_size = len(population)
 
     # 精英数
     top_elite_count = int(elite_rate * population_size)
 
     # 主循环迭代
+    scores = None
     for i in range(max_iter):
         # 获取种群中所有基因的适应度和基因的元组
         scores = [(gene, adaptive_function(matrix_data, gene)) for gene in population]
         scores.sort(reverse=True, key=operator.itemgetter(1))
-        print(scores[0], i + 1)
+        procedure.append((scores[0], i + 1, time.time() - t_begin))
+        # print(scores[0], i + 1)
         # print(str(i) + '-------------------')
         # for score in scores:
         #     print(score)
@@ -222,30 +230,32 @@ def genetic_optimize(matrix_data, adaptive_function, mutate_prob=0.2, population
                 population.append(cross_over(ranked_population[i], ranked_population[k]))
 
     # 返回收敛后的解元组(适应度,染色体)
-    return scores[0]
+    return procedure
 
 
-def random_optimize(matrix_data, adaptive_function, times):
+def random_optimize(matrix_data, adaptive_function):
     """
     随机搜索算法
     :param matrix_data:
     :param adaptive_function:
-    :param times:
     :return:
     """
+    # 记录算法开始时间戳
+    t_begin = time.time()
     vec = []
     for i in range(len(matrix_data)):
         vec.append(0)
     v_best = adaptive_function(matrix_data, vec)
     chromosome_best = vec[:]
     # 获取随机点
-    population = generate_population(matrix_data, times)
+    population = data.get_population()
     for chromosome in population:
         v_cur = adaptive_function(matrix_data, chromosome)
         if v_best < v_cur:
             v_best = v_cur
             chromosome_best = chromosome[:]
-    return chromosome_best, v_best
+    # 返回元组为(解,值,运行时间)
+    return chromosome_best, v_best, time.time() - t_begin
 
 
 def hill_climbing(matrix_data, adaptive_function, vec):
@@ -273,16 +283,17 @@ def hill_climbing(matrix_data, adaptive_function, vec):
         return v_best
 
 
-def random_hill_climbing(matrix_data, adaptive_function, times, step=1):
+def random_hill_climbing(matrix_data, adaptive_function):
     """
     随机重复爬山算法
     :param matrix_data:
     :param adaptive_function:
-    :param times:
     :return:
     """
+    # 记录算法开始时间
+    t_begin = time.time()
     # 获取初始随机点
-    population = generate_population(matrix_data, times)
+    population = data.get_population()
     best_chromosome = []
     for i in range(len(matrix_data)):
         best_chromosome.append(0)
@@ -292,10 +303,12 @@ def random_hill_climbing(matrix_data, adaptive_function, times, step=1):
         if cur_value > best_value:
             best_value = cur_value
             best_chromosome = chromosome
-    return best_chromosome, best_value
+    # 返回的元组为(解,值,运行时间)
+    return best_chromosome, best_value, time.time() - t_begin
 
 
-def simulated_annealing(matrix_data, adaptive_function, temperature=10000, t_threshold=0.1, cooling_rate=0.1, step=1):
+def random_simulated_annealing(matrix_data, adaptive_function, temperature=10000, t_threshold=0.1, cooling_rate=0.1,
+                               step=1):
     """
     模拟退火算法
     :param matrix_data:
@@ -306,74 +319,67 @@ def simulated_annealing(matrix_data, adaptive_function, temperature=10000, t_thr
     :param step:
     :return:
     """
-    vec = generate_population(matrix_data, 1)[0]
-    v_origin = 0
-    while temperature > t_threshold:
-        # 选择一个索引位置
-        i = np.random.randint(0, len(vec) - 1)
-        # 选择一个改变索引的方向
-        direction = np.random.randint(-step, step)
-        # 创建新解
-        vec_b = vec[:]
-        if vec_b[i] + direction >= matrix_data[i].shape[0]:
-            vec_b[i] = matrix_data[i].shape[0]
-        elif vec_b[i] + direction < 0:
-            vec_b[i] = 0
-        else:
-            vec_b[i] += direction
+    # 记录算法开始时间戳
+    t_begin = time.time()
+    # 获取起始种群
+    population = data.get_population()
+    best_vec = population[0]
+    best_value = adaptive_function(matrix_data, best_vec)
+    for vec in population:
+        v_origin = 0
+        cur_temperature = temperature
+        while cur_temperature > t_threshold:
+            # 选择一个索引位置
+            i = np.random.randint(0, len(vec) - 1)
+            # 选择一个改变索引的方向
+            direction = np.random.randint(-step, step)
+            # 创建新解
+            vec_b = vec[:]
+            if vec_b[i] + direction >= matrix_data[i].shape[0]:
+                vec_b[i] = matrix_data[i].shape[0]
+            elif vec_b[i] + direction < 0:
+                vec_b[i] = 0
+            else:
+                vec_b[i] += direction
 
-        # 当前解的目标函数
-        v_origin = adaptive_function(matrix_data, vec)
-        # 新解的目标函数
-        v_b = adaptive_function(matrix_data, vec_b)
+            # 当前解的目标函数
+            v_origin = adaptive_function(matrix_data, vec)
+            # 新解的目标函数
+            v_b = adaptive_function(matrix_data, vec_b)
 
-        # 接受更好的解,或者温度高时有一定概率接受更差的解
-        if v_origin < v_b or np.random.random() < pow(math.e, -(v_b - v_origin) / temperature):
-            vec = vec_b
+            # 接受更好的解,或者温度高时有一定概率接受更差的解
+            if v_origin < v_b or np.random.random() < pow(math.e, -(v_b - v_origin) / cur_temperature):
+                vec = vec_b
 
-        # 降温
-        temperature *= cooling_rate
-    return vec, v_origin
-
-
-def random_sa(matrix_data, adaptive_function, times=1000, temperature=10000, t_threshold=0.1, cooling_rate=0.1, step=1):
-    """
-    随机重复模拟退火算法
-    :param matrix_data:
-    :param adaptive_function:
-    :param times:
-    :param temperature:
-    :param t_threshold:
-    :param cooling_rate:
-    :param step:
-    :return:
-    """
-    result = (None, 0)
-    if times <= 0:
-        times = 1000
-    for i in range(times):
-        cur_result = simulated_annealing(matrix_data, adaptive_function, temperature, t_threshold, cooling_rate, step)
-        if cur_result[1] > result[1]:
-            result = cur_result
-    return result
+            # 降温
+            cur_temperature *= cooling_rate
+        # 记录最佳值和解
+        if v_origin > best_value:
+            best_value = v_origin
+            best_vec = vec
+    # 返回元组为(解,值,运行时间)
+    return best_vec, best_value, time.time() - t_begin
 
 
-def particle_swarm_optimize(matrix_data, adaptive_function, max_iter=100, population_size=100, weight=0.8, c1=2, c2=2):
+def particle_swarm_optimize(matrix_data, adaptive_function, max_iter=100, weight=0.8, c1=2, c2=2):
     """
     一种改进的粒子群优化算法
     :param matrix_data:
     :param adaptive_function:
     :param max_iter:
-    :param population_size:
     :param weight:
     :param c1:
     :param c2:
     :return:
     """
+    # 算法开始时间戳
+    t_begin = time.time()
+    # 记录迭代状态
+    procedure = []
     # 粒子群
-    population = generate_population(matrix_data, population_size)
+    population = data.get_population()
     # 随机速度
-    speeds = generate_population(matrix_data, population_size)
+    speeds = data.generate_population(matrix_data, len(population))
     # 每个粒子的最佳纪录
     best_histories = []
     # 粒子群的最佳纪录
@@ -386,7 +392,8 @@ def particle_swarm_optimize(matrix_data, adaptive_function, max_iter=100, popula
             best_of_all = (chromosome, value_cur)
     # 主循环
     for i in range(max_iter):
-        print(best_of_all, i)
+        procedure.append((best_of_all, i + 1, time.time() - t_begin))
+        # print(best_of_all, i)
         # print(best_histories[0])
         # print(population[0])
         # print(speeds[0])
@@ -417,43 +424,125 @@ def particle_swarm_optimize(matrix_data, adaptive_function, max_iter=100, popula
                 # print('updated')
                 best_of_all = (chromosome[:], value_cur)
 
-    return best_of_all
+    procedure.append((best_of_all, i + 1, time.time() - t_begin))
+
+    return procedure
 
 
-def improved_ga(matrix_data, adaptive_function, mutate_prob=0.2, population_size=100, step=1, elite_rate=0.2,
-                max_iter=100):
+def improved_ga(matrix_data, adaptive_function, chromosome_mutate_rate=0.2, step=1, elite_rate=0.2,
+                max_iter=100, temperature=10000, threshold_mutate_prob=0.1, cooling_rate=0.8):
     """
     变异算子经过改进的遗传算法,
-    采用选择算子采用排序法,
-    变异算子,
+    选择算子采用模拟退火思想,
+    变异算子遍历选取局部最优解,
     交叉算子采用随机交叉
-    :param matrix_data:
-    :param adaptive_function:
-    :param mutate_prob:
-    :param population_size:
-    :param step:
-    :param elite_rate:
-    :param max_iter:
+    :param matrix_data:目标矩阵
+    :param adaptive_function:适应度函数
+    :param chromosome_mutate_rate: 每次变异时,染色体中有chromosome_mutate_rate的比例的基因将会发生突变
+    :param step:单个基因变异移动步骤
+    :param elite_rate:精英留存率
+    :param max_iter:最大迭代次数
+    :param temperature:温度
+    :param threshold_mutate_prob:最高变异率
+    :param cooling_rate:冷却率
     :return:
     """
 
-    def mutate(vec):
+    # def mutate(vec):
+    #     """
+    #     变异算子
+    #     :param vec:染色体
+    #     :return:
+    #     """
+    #     m = np.random.randint(0, len(matrix_data))
+    #     cur_vec = vec[0:m] + [(vec[m] - step + matrix_data[m].shape[0]) % matrix_data[m].shape[0]] + vec[m + 1:]
+    #     best_val = adaptive_function(matrix_data, cur_vec)
+    #     # temp = best_val
+    #     best_vec = cur_vec
+    #     for n in range(int(chromosome_mutate_rate * len(vec))):
+    #         m = np.random.randint(0, len(matrix_data))
+    #         if np.random.random() < 0.5:
+    #             # 向下变异,移动step个单位
+    #             cur_vec = vec[0:m] + [(vec[m] - step + matrix_data[m].shape[0]) % matrix_data[m].shape[0]] + vec[m + 1:]
+    #         else:
+    #             # 向上变异,移动step个单位
+    #             cur_vec = vec[0:m] + [(vec[m] + step) % matrix_data[m].shape[0]] + vec[m + 1:]
+    #         cur_val = adaptive_function(matrix_data, cur_vec)
+    #         if cur_val > best_val:
+    #             best_val = cur_val
+    #             best_vec = cur_vec[:]
+    #     # print(temp, best_val)
+    #     return best_vec
+
+    # def mutate2(vec):
+    #     """
+    #     终极大杀器,
+    #     当前模型不好,
+    #     基因之间不相关,
+    #     每个基因都有自己的最佳编码,
+    #     因此只要获取染色体的各个基因位置各自的最佳编码,
+    #     该染色体就是最佳染色体(最优解),
+    #     嘛,写论文的时候我是不会写进去的...哈哈...
+    #     改进过的变异算子
+    #     随机基因位置,
+    #     确定该基因最合适编码
+    #     :param vec:
+    #     :return:
+    #     """
+    #     m = np.random.randint(0, len(matrix_data))
+    #     best_chromosome = 0
+    #     best_v = 0
+    #     for index in range(0, matrix_data[m].shape[0]):
+    #         cur_v = adaptive_function(matrix_data, vec[0:m] + [index] + vec[m + 1:])
+    #         if cur_v > best_v:
+    #             best_v = cur_v
+    #             best_chromosome = vec[0:m] + [index] + vec[m + 1:]
+    #     return best_chromosome
+
+    def mutate(vec, accept_prob=0):
         """
         改进过的变异算子,
         随机基因位置,
         确定该基因最合适编码
         :param vec:
+        :param accept_prob:
         :return:
         """
         m = np.random.randint(0, len(matrix_data))
-        best_gene = 0
-        best_v = 0
-        for index in range(0, matrix_data[m].shape[0]):
-            cur_v = adaptive_function(matrix_data, vec[0:m] + [index] + vec[m + 1:])
-            if cur_v > best_v:
-                best_v = cur_v
-                best_gene = vec[0:m] + [index] + vec[m + 1:]
-        return best_gene
+        best_val = 0
+        g_index = np.random.randint(0, matrix_data[m].shape[0])
+        best_vec = None
+        while True:
+            cur_vec = vec[0:m] + [g_index] + vec[m + 1:]
+            cur_val = adaptive_function(matrix_data, cur_vec)
+            if best_val < cur_val or np.random.random() < accept_prob:
+                best_val = cur_val
+                best_vec = cur_vec[:]
+            else:
+                break
+        return best_vec
+
+    # def mutate3(vec):
+    #     """
+    #     改进过的变异算子,
+    #     随机基因位置,
+    #     确定该基因最合适编码
+    #     :param vec:
+    #     :return:
+    #     """
+    #     m = np.random.randint(0, len(matrix_data))
+    #     best_val = 0
+    #     g_index = np.random.randint(0, matrix_data[m].shape[0])
+    #     best_vec = None
+    #     while True:
+    #         cur_vec = vec[0:m] + [g_index] + vec[m + 1:]
+    #         cur_val = adaptive_function(matrix_data, cur_vec)
+    #         if best_val < cur_val:
+    #             best_val = cur_val
+    #             best_vec = cur_vec[:]
+    #         else:
+    #             break
+    #     return best_vec
 
     def cross_over(r1, r2):
         """
@@ -462,100 +551,148 @@ def improved_ga(matrix_data, adaptive_function, mutate_prob=0.2, population_size
         :param r2:
         :return:
         """
-        m = np.random.randint(1, len(r1) - 2)
-        return r1[:m] + r2[m:]
+        result = []
+        for m in range(len(r1)):
+            if np.random.random() > 0.5:
+                result.append(r1[m])
+            else:
+                result.append(r2[m])
+        return result
+
+    # 记录算法开始时间戳
+    t_begin = time.time()
+
+    # 记录每一代的最优状态
+    procedure = []
 
     # 随机生成初始种群
-    population = generate_population(matrix_data, population_size)
+    population = data.get_population()
+    population_size = len(population)
 
     # 精英数
     top_elite_count = int(elite_rate * population_size)
 
     # 主循环迭代
+    scores = None
     for i in range(max_iter):
         # 获取种群中所有基因的适应度和基因的元组
         scores = [(gene, adaptive_function(matrix_data, gene)) for gene in population]
         scores.sort(reverse=True, key=operator.itemgetter(1))
-        print(scores[0], i + 1)
+        procedure.append((scores[0], i + 1, time.time() - t_begin))
+        # print(scores[0], i + 1)
         # print(str(i) + '-------------------')
         # for score in scores:
         #     print(score)
 
-        ranked_population = [g for (g, s) in scores]
+        ranked_population = [g for (g, v) in scores]
 
-        # 获取精英基因,淘汰劣质染色体
+        # 动态计算变异率,模拟退火算法计算变异率,如得到的变异率大于设定的最低变异率,则按最低变异率按最大变异率计算
         population = ranked_population[:top_elite_count]
-
+        mutate_prob = 1 - pow(math.e, -(scores[top_elite_count - 1][1] - scores[0][1])) / temperature
+        if threshold_mutate_prob > mutate_prob:
+            mutate_prob = threshold_mutate_prob
+        else:
+            # 降温
+            temperature *= cooling_rate
+        # 获取精英基因,淘汰劣质染色体
         while len(population) < population_size:
             if np.random.random() < mutate_prob:
                 # 变异
                 i = np.random.randint(0, top_elite_count)
-                population.append(mutate(ranked_population[i]))
+                population.append(mutate(ranked_population[i], 1 - mutate_prob))
             else:
                 # 交叉
                 i = np.random.randint(0, top_elite_count)
                 k = np.random.randint(0, top_elite_count)
                 population.append(cross_over(ranked_population[i], ranked_population[k]))
 
-    # 返回收敛后的解元组(适应度,染色体)
-    return scores[0]
+                # 返回收敛后的解元组(适应度,染色体)
+    # 返回的元组((解,值),代数,运行时间)
+    return procedure
 
 
-def generate_population(matrix_data, population_size):
+def print_array(arr):
     """
-    生成初始种群,
-    将生成初始种群的函数独立出来,
-    以便存储初始种群,
-    用于做不同算法之间的对比
-    :param matrix_data:
-    :param population_size:
+    打印数组
+    :param arr:
     :return:
     """
-    population = []
-    for i in range(population_size):
-        vec = [np.random.randint(0, matrix_data[k].shape[0])
-               for k in range(len(matrix_data))]
-        population.append(vec)
-    return population
+    for l in arr:
+        print(l)
 
 
 if __name__ == '__main__':
+    # 读取仿真数据矩阵的数组
     simulation_data = []
     for j in range(data.class_length):
         simulation_data.append(pd.read_csv(data.dt_path(j), index_col=0))
 
-    # file_handler = open('test.data', 'w')
-    # file_handler.write(str(simulation_data))
-    # file_handler.close()
+    '''
+    各个算法重复20次试验并保存结果
 
-    # print(best_qos(simulation_data))
+    每次实验分别运行6个算法
+    随机搜索...1
+    重复爬山...2
+    重复模拟退火...3
+    改进后的遗传算法(目标算法)...4
+    遗传算法...5
+    粒子群优化...6
 
-    # print('generic algorithm')
-    # genetic_optimize(simulation_data, qos_total, max_iter=100, population_size=200,
-    #                  mutate_prob=0.95, step=4)
+    实验结果元组格式为(解,值,运行时间)
+    其中算法4,5,6保存每一次迭代的状态
 
-    print('improved generic algorithm')
-    improved_ga(simulation_data, qos_total, max_iter=30, population_size=200,
-                mutate_prob=0.95, step=4)
-    # print('random search')
-    # print(random_optimize(simulation_data, qos_total, 10000))
+    每次算法1,2,3的初始随机解即群体智能算法(算法4,5,6)的初始种群
+    此外每次实验的初始种群(初始随机解)重新生成一次
+    '''
+    # 实验总用时起始时间戳
+    t_begin = time.time()
+    # 实验的种群大小
+    population_size = 200
+    for index in range(20, 21):
+        # 生成初始种群(初始随机解)
+        data.generate_population(simulation_data, population_size)
 
-    # print('random restart hill climbing')
-    # print(random_hill_climbing(simulation_data, qos_total, 10000))
+        # 随机搜索
+        print('random search ' + str(index))
+        result = random_optimize(simulation_data, qos_total)
+        path = 'result/' + str(index) + '_1_random_search.pkl'
+        data.write_result(path, result)
+        # print(data.read_result(path))
 
-    # print('simulated annealing')
-    # print(simulated_annealing(simulation_data, qos_total))
+        # 重复爬山
+        print('random restart hill climbing ' + str(index))
+        result = random_hill_climbing(simulation_data, qos_total)
+        path = 'result/' + str(index) + '_2_random_restart_hill_climbing.pkl'
+        data.write_result(path, result)
+        # print(data.read_result(path))
 
-    # print('random restart simulated annealing')
-    # print(random_sa(simulation_data, qos_total, times=5000))
+        # 重复模拟退火
+        print('simulated annealing ' + str(index))
+        result = random_simulated_annealing(simulation_data, qos_total)
+        path = 'result/' + str(index) + '_3_simulated_annealing.pkl'
+        data.write_result(path, result)
+        # print(data.read_result(path))
 
-    # print('particle swarm optimization')
-    # print(particle_swarm_optimize(simulation_data, qos_total, max_iter=500, population_size=100))
+        # 改进后的遗传算法
+        print('improved generic algorithm ' + str(index))
+        result = improved_ga(simulation_data, qos_total, max_iter=100, threshold_mutate_prob=0.95)
+        path = 'result/' + str(index) + '_4_improved_generic_algorithm.pkl'
+        data.write_result(path, result)
+        # print_array(data.read_result(path))
 
-    # test_gene = [4, 14, 18, 6, 12, 7]
-    # print(qos_time(simulation_data, test_gene))
-    # print(qos_cost(simulation_data, test_gene))
-    # print(qos_availability(simulation_data, test_gene))
-    # print(qos_reliability(simulation_data, test_gene))
-    # print(qos_reputation(simulation_data, test_gene))
-    # print(round(qos_total(simulation_data, test_gene), ndigits=4))
+        # 遗传算法
+        print('generic algorithm ' + str(index))
+        result = genetic_optimize(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
+        path = 'result/' + str(index) + '_5_generic_algorithm.pkl'
+        data.write_result(path, result)
+        # print_array(data.read_result(path))
+
+        # 粒子群优化
+        print('particle swarm optimization ' + str(index))
+        result = particle_swarm_optimize(simulation_data, qos_total, max_iter=200)
+        path = 'result/' + str(index) + '_6_generic_algorithm.pkl'
+        data.write_result(path, result)
+        # print_array(data.read_result(path))
+
+    # 总用时
+    print(time.time() - t_begin)
