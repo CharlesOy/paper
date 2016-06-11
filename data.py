@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import pickle
 import math
 import numpy as np
 import pandas as pd
@@ -76,8 +77,89 @@ def dt_path(i):
     return base_path + str(i) + '.data'
 
 
+def generate_population(matrix_data, population_size):
+    """
+    生成初始种群,
+    将生成初始种群的函数独立出来,
+    以便存储初始种群,
+    用于做不同算法之间的对比
+    :param matrix_data:
+    :param population_size:
+    :return:
+    """
+    population = []
+    for i in range(population_size):
+        vec = [np.random.randint(0, matrix_data[k].shape[0])
+               for k in range(len(matrix_data))]
+        population.append(vec)
+    df = pd.DataFrame(population)
+    df.to_csv('data/population.data')
+    return population
+
+
+def get_population():
+    """
+    读取种群数据
+    :return:
+    """
+    return [list(t) for t in pd.read_csv('data/population.data', index_col=0).to_records(index=False)]
+
+
+def get_simulation_data():
+    """
+    获取初始种群
+    :return:
+    """
+    result = []
+    for i in range(class_length):
+        result.append(pd.read_csv(dt_path(i), index_col=0))
+    return result
+
+
+def write_result(path, data):
+    """
+    写结果文件到指定路径
+    :param path:
+    :param data:
+    :return:
+    """
+    file_output = open(path, 'wb')
+    pickle.dump(data, file_output)
+    file_output.close()
+    return
+
+
+def read_result(path):
+    """
+    从指定路径读结果文件
+    :param path:
+    :return:
+    """
+    file_input = open(path, 'rb')
+    data = pickle.load(file_input)
+    file_input.close()
+    return data
+
+
+def print_array(arr, reverse=False):
+    """
+    打印数组
+    :param arr:
+    :param reverse:
+    :return:
+    """
+    if reverse:
+        for l in reversed(arr):
+            print(l)
+        return
+    for l in arr:
+        print(l)
+
+
 if __name__ == '__main__':
-    for j in range(class_length):
-        path = dt_path(j)
-        simulation_data = generate_df(_length=length)
-        simulation_data.to_csv(path)
+    # for j in range(class_length):
+    #     path = dt_path(j)
+    #     simulation_data = generate_df(_length=length)
+    #     simulation_data.to_csv(path)
+    # generate_population(get_simulation_data(), 200)
+    get_population()
