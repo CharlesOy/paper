@@ -202,7 +202,6 @@ def genetic_optimize(matrix_data, adaptive_function, mutate_prob=0.2, step=1, el
     top_elite_count = int(elite_rate * population_size)
 
     # 主循环迭代
-    scores = None
     for i in range(max_iter):
         # 获取种群中所有基因的适应度和基因的元组
         scores = [(gene, adaptive_function(matrix_data, gene)) for gene in population]
@@ -573,7 +572,6 @@ def improved_ga(matrix_data, adaptive_function, chromosome_mutate_rate=0.2, step
     top_elite_count = int(elite_rate * population_size)
 
     # 主循环迭代
-    scores = None
     for i in range(max_iter):
         # 获取种群中所有基因的适应度和基因的元组
         scores = [(gene, adaptive_function(matrix_data, gene)) for gene in population]
@@ -611,16 +609,6 @@ def improved_ga(matrix_data, adaptive_function, chromosome_mutate_rate=0.2, step
     return procedure
 
 
-def print_array(arr):
-    """
-    打印数组
-    :param arr:
-    :return:
-    """
-    for l in arr:
-        print(l)
-
-
 if __name__ == '__main__':
     # 读取仿真数据矩阵的数组
     simulation_data = []
@@ -645,54 +633,54 @@ if __name__ == '__main__':
     此外每次实验的初始种群(初始随机解)重新生成一次
     '''
     # 实验总用时起始时间戳
-    t_begin = time.time()
+    t_begin_ = time.time()
     # 实验的种群大小
-    population_size = 200
-    for index in range(20, 21):
+    population_size_ = 200
+    for index_ in range(1, 21):
         # 生成初始种群(初始随机解)
-        data.generate_population(simulation_data, population_size)
+        data.generate_population(simulation_data, population_size_)
 
-        # 随机搜索
-        print('random search ' + str(index))
-        result = random_optimize(simulation_data, qos_total)
-        path = 'result/' + str(index) + '_1_random_search.pkl'
-        data.write_result(path, result)
+        随机搜索
+        print('random search ' + str(index_))
+        result_ = random_optimize(simulation_data, qos_total)
+        path = 'result/' + str(index_) + '_1_random_search.pkl'
+        data.write_result(path, result_)
         # print(data.read_result(path))
 
         # 重复爬山
-        print('random restart hill climbing ' + str(index))
-        result = random_hill_climbing(simulation_data, qos_total)
-        path = 'result/' + str(index) + '_2_random_restart_hill_climbing.pkl'
-        data.write_result(path, result)
+        print('random restart hill climbing ' + str(index_))
+        result_ = random_hill_climbing(simulation_data, qos_total)
+        path = 'result/' + str(index_) + '_2_random_restart_hill_climbing.pkl'
+        data.write_result(path, result_)
         # print(data.read_result(path))
 
         # 重复模拟退火
-        print('simulated annealing ' + str(index))
-        result = random_simulated_annealing(simulation_data, qos_total)
-        path = 'result/' + str(index) + '_3_simulated_annealing.pkl'
-        data.write_result(path, result)
+        print('simulated annealing ' + str(index_))
+        result_ = random_simulated_annealing(simulation_data, qos_total)
+        path = 'result/' + str(index_) + '_3_simulated_annealing.pkl'
+        data.write_result(path, result_)
         # print(data.read_result(path))
 
         # 改进后的遗传算法
-        print('improved generic algorithm ' + str(index))
-        result = improved_ga(simulation_data, qos_total, max_iter=100, threshold_mutate_prob=0.95)
-        path = 'result/' + str(index) + '_4_improved_generic_algorithm.pkl'
-        data.write_result(path, result)
-        # print_array(data.read_result(path))
+        print('improved generic algorithm ' + str(index_))
+        result_ = improved_ga(simulation_data, qos_total, max_iter=100, threshold_mutate_prob=0.95)
+        path = 'result/' + str(index_) + '_4_improved_generic_algorithm.pkl'
+        data.write_result(path, result_)
+        # data.print_array(data.read_result(path))
 
         # 遗传算法
-        print('generic algorithm ' + str(index))
-        result = genetic_optimize(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
-        path = 'result/' + str(index) + '_5_generic_algorithm.pkl'
-        data.write_result(path, result)
-        # print_array(data.read_result(path))
+        print('generic algorithm ' + str(index_))
+        result_ = genetic_optimize(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
+        path = 'result/' + str(index_) + '_5_generic_algorithm.pkl'
+        data.write_result(path, result_)
+        # data.print_array(data.read_result(path))
 
         # 粒子群优化
-        print('particle swarm optimization ' + str(index))
-        result = particle_swarm_optimize(simulation_data, qos_total, max_iter=200)
-        path = 'result/' + str(index) + '_6_generic_algorithm.pkl'
-        data.write_result(path, result)
-        # print_array(data.read_result(path))
+        print('particle swarm optimization ' + str(index_))
+        result_ = particle_swarm_optimize(simulation_data, qos_total, max_iter=700)
+        path = 'result/' + str(index_) + '_6_particle_swarm_optimization.pkl'
+        data.write_result(path, result_)
+        # data.print_array(data.read_result(path))
 
     # 总用时
-    print(time.time() - t_begin)
+    print(time.time() - t_begin_)
