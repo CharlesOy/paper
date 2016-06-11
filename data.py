@@ -141,6 +141,21 @@ def read_result(path):
     return data
 
 
+def print_array(arr, reverse=False):
+    """
+    打印数组
+    :param arr:
+    :param reverse:
+    :return:
+    """
+    if reverse:
+        for l in reversed(arr):
+            print(l)
+        return
+    for l in arr:
+        print(l)
+
+
 if __name__ == '__main__':
     # for j in range(class_length):
     #     path = dt_path(j)
