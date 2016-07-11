@@ -609,11 +609,160 @@ def improved_ga(matrix_data, adaptive_function, chromosome_mutate_rate=0.2, step
     return procedure
 
 
+def improved_abc(matrix_data, cost_function, onlooker_number=200, limit=10, max_iter=200):
+    """
+    一种改进蜂群算法(在本文中用于对比),
+    蜜源和采蜜蜂的数量有data.get_population()方法决定
+    :param matrix_data: 搜索空间
+    :param cost_function: 目标函数
+    :param onlooker_number: 观察蜂个数
+    :param limit: 单个蜜源搜索限制次数
+    :param max_iter: 最大迭代次数
+    :return:
+    """
+
+    """
+    # 简化人工蜂群的解释过程
+    1.随机生成一定数量的解
+    2.对于每一次循环有:
+    3.  每个解的每个维度取值按照公式一变动一次,如果适应度更优,则更新解
+    4.  按照适应度的比例,随机更新每个解,总次数一定
+    5.  如果超过limit次迭代解都没有得到更新,则使用一个新的随机解代替该解
+    6.达到循环结束条件
+    """
+
+    # 记录算法开始时间戳
+    t_begin = time.time()
+
+    # 蜜源
+    nectar_source = data.get_population()
+
+    # 各个维度上取值的最大值和最小值
+    df_data = pd.DataFrame(nectar_source)
+    v_range = [df_data.min(), df_data.max()]
+
+    # 蜜源未更新的累积迭代次数,超过limit次的话将被重新生成的蜜源代替
+    iter_times = []
+    # 初始化iter_times
+    for i in range(len(nectar_source)):
+        iter_times.append(1)
+
+    def generate_solution(min_, max_):
+        """
+        生成某个解的某个维度上的一个随机数,
+        初始化时或者侦查蜂寻找新的蜜源时用
+        :param min_: 解空间最小值
+        :param max_: 解空间最大值
+        :return:
+        """
+        return min_ + int(np.random.random() * (max_ - min_))
+
+    def update_info(vec_):
+        """
+        更新蜜源信息
+        :param vec_: 待更新蜜源
+        :return:
+        """
+        k = int(np.random.random() * len(nectar_source))
+        return [(vec_[index_] + int(np.random.random() * (v2 - vec_[index_]) + v_range[1][index_])) % v_range[1][index_]
+                for index_, v2 in enumerate(nectar_source[k])]
+
+    def update_prob_territory():
+        """
+        更新适应度百分概率分布信息
+        :return:
+        """
+        probability_territory_ = []
+        fitness_sum = 0
+        for vec_ in nectar_source:
+            fitness_sum += cost_function(matrix_data, vec_)
+        current_fitness_sum = 0
+        for vec_ in nectar_source:
+            current_fitness_sum += cost_function(matrix_data, vec_)
+            probability_territory_.append(float(current_fitness_sum) / fitness_sum)
+        return probability_territory_
+
+    def search_nectar(vec_old_, vec_new_):
+        """
+        一次搜索,确定两个蜜源的蜜量,返回较大蜜量的蜜源
+        :param vec_old_:
+        :param vec_new_:
+        :return: 更优蜜源,蜜源蜜量,蜜源是否更新过
+        """
+        nectar_quantity_old_ = cost_function(matrix_data, vec_old_)
+        nectar_quantity_new_ = cost_function(matrix_data, vec_new_)
+
+        if nectar_quantity_new_ > nectar_quantity_old_:
+            return vec_new_, nectar_quantity_new_, True
+        return vec_old_, nectar_quantity_old_, False
+
+    nectar_quantity_best = 0
+    nectar_best = nectar_source[0]
+    for it in range(max_iter):
+        # 采蜜蜂随机寻找新的蜜源,贪婪思想更新蜜源(设置含蜜量更多的蜜源为新蜜源)
+        for i in range(len(nectar_source)):
+            vec = nectar_source[i]
+            nectar_new = update_info(vec)
+            nectar_source[i], nectar_quantity_temp, changed = search_nectar(vec, nectar_new)
+            # 记录蜜源不变的迭代次数
+            if changed:
+                iter_times[i] = 0
+            else:
+                iter_times[i] += 1
+
+        # 适应度百分概率条形图,记录从某个位置到某个位置
+        probability_territory = update_prob_territory()
+
+        # 观察蜂根据采蜜蜂更新的蜜源信息随机确定搜索的蜜源区域
+        for i in range(onlooker_number):
+            # 确定当前观察蜂搜索的蜜源区域
+            rand_num = np.random.random()
+            index = len(probability_territory) - 1
+            for j in range(len(probability_territory)):
+                pt = probability_territory[j]
+                if rand_num < pt:
+                    index = j
+                    break
+            # 搜索第index个蜜源区域
+            vec = nectar_source[index]
+            nectar_new = update_info(vec)
+            nectar_source[index], nectar_quantity_temp, changed = search_nectar(vec, nectar_new)
+            # 记录蜜源不变的迭代次数
+            if changed:
+                iter_times[i] = 0
+            else:
+                iter_times[i] += 1
+
+        # 采蜜蜂是否需要成为侦查蜂重新侦查新的蜜源,根据蜜源不变的迭代次数和limit参数确实定否侦查
+        for i in range(len(iter_times)):
+            times = iter_times[i]
+            if times >= limit and nectar_source[i] != nectar_best:
+                vec_new = []
+                for j in range(len(nectar_source[0])):
+                    vec_new.append(generate_solution(v_range[0][j], v_range[1][j]))
+                nectar_source[i] = vec_new
+
+        # 获取最佳蜜源
+        nectar_quantity_best = cost_function(matrix_data, nectar_source[0])
+        nectar_best = None
+        for vec in nectar_source:
+            nectar_quantity_temp = cost_function(matrix_data, vec)
+            if nectar_quantity_best < nectar_quantity_temp:
+                nectar_quantity_best = nectar_quantity_temp
+                nectar_best = vec
+        print(it, nectar_quantity_best, time.time() - t_begin)
+
+    return nectar_quantity_best, nectar_best
+
+
 if __name__ == '__main__':
     # 读取仿真数据矩阵的数组
     simulation_data = []
-    for j in range(data.class_length):
-        simulation_data.append(pd.read_csv(data.dt_path(j), index_col=0))
+    for j_ in range(data.class_length):
+        simulation_data.append(pd.read_csv(data.dt_path(j_), index_col=0))
+
+    # 测试ABC算法
+    print(improved_abc(simulation_data, qos_total))
 
     '''
     各个算法重复20次试验并保存结果
@@ -632,55 +781,55 @@ if __name__ == '__main__':
     每次算法1,2,3的初始随机解即群体智能算法(算法4,5,6)的初始种群
     此外每次实验的初始种群(初始随机解)重新生成一次
     '''
-    # 实验总用时起始时间戳
-    t_begin_ = time.time()
-    # 实验的种群大小
-    population_size_ = 200
-    for index_ in range(1, 21):
-        # 生成初始种群(初始随机解)
-        data.generate_population(simulation_data, population_size_)
-
-        随机搜索
-        print('random search ' + str(index_))
-        result_ = random_optimize(simulation_data, qos_total)
-        path = 'result/' + str(index_) + '_1_random_search.pkl'
-        data.write_result(path, result_)
-        # print(data.read_result(path))
-
-        # 重复爬山
-        print('random restart hill climbing ' + str(index_))
-        result_ = random_hill_climbing(simulation_data, qos_total)
-        path = 'result/' + str(index_) + '_2_random_restart_hill_climbing.pkl'
-        data.write_result(path, result_)
-        # print(data.read_result(path))
-
-        # 重复模拟退火
-        print('simulated annealing ' + str(index_))
-        result_ = random_simulated_annealing(simulation_data, qos_total)
-        path = 'result/' + str(index_) + '_3_simulated_annealing.pkl'
-        data.write_result(path, result_)
-        # print(data.read_result(path))
-
-        # 改进后的遗传算法
-        print('improved generic algorithm ' + str(index_))
-        result_ = improved_ga(simulation_data, qos_total, max_iter=100, threshold_mutate_prob=0.95)
-        path = 'result/' + str(index_) + '_4_improved_generic_algorithm.pkl'
-        data.write_result(path, result_)
-        # data.print_array(data.read_result(path))
-
-        # 遗传算法
-        print('generic algorithm ' + str(index_))
-        result_ = genetic_optimize(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
-        path = 'result/' + str(index_) + '_5_generic_algorithm.pkl'
-        data.write_result(path, result_)
-        # data.print_array(data.read_result(path))
-
-        # 粒子群优化
-        print('particle swarm optimization ' + str(index_))
-        result_ = particle_swarm_optimize(simulation_data, qos_total, max_iter=700)
-        path = 'result/' + str(index_) + '_6_particle_swarm_optimization.pkl'
-        data.write_result(path, result_)
-        # data.print_array(data.read_result(path))
-
-    # 总用时
-    print(time.time() - t_begin_)
+    # # 实验总用时起始时间戳
+    # t_begin_ = time.time()
+    # # 实验的种群大小
+    # population_size_ = 200
+    # for index_ in range(1, 21):
+    #     # 生成初始种群(初始随机解)
+    #     data.generate_population(simulation_data, population_size_)
+    #
+    #     # 随机搜索
+    #     print('random search ' + str(index_))
+    #     result_ = random_optimize(simulation_data, qos_total)
+    #     path = 'result/' + str(index_) + '_1_random_search.pkl'
+    #     data.write_result(path, result_)
+    #     # print(data.read_result(path))
+    #
+    #     # 重复爬山
+    #     print('random restart hill climbing ' + str(index_))
+    #     result_ = random_hill_climbing(simulation_data, qos_total)
+    #     path = 'result/' + str(index_) + '_2_random_restart_hill_climbing.pkl'
+    #     data.write_result(path, result_)
+    #     # print(data.read_result(path))
+    #
+    #     # 重复模拟退火
+    #     print('simulated annealing ' + str(index_))
+    #     result_ = random_simulated_annealing(simulation_data, qos_total)
+    #     path = 'result/' + str(index_) + '_3_simulated_annealing.pkl'
+    #     data.write_result(path, result_)
+    #     # print(data.read_result(path))
+    #
+    #     # 改进后的遗传算法
+    #     print('improved generic algorithm ' + str(index_))
+    #     result_ = improved_ga(simulation_data, qos_total, max_iter=100, threshold_mutate_prob=0.95)
+    #     path = 'result/' + str(index_) + '_4_improved_generic_algorithm.pkl'
+    #     data.write_result(path, result_)
+    #     # data.print_array(data.read_result(path))
+    #
+    #     # 遗传算法
+    #     print('generic algorithm ' + str(index_))
+    #     result_ = genetic_optimize(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
+    #     path = 'result/' + str(index_) + '_5_generic_algorithm.pkl'
+    #     data.write_result(path, result_)
+    #     # data.print_array(data.read_result(path))
+    #
+    #     # 粒子群优化
+    #     print('particle swarm optimization ' + str(index_))
+    #     result_ = particle_swarm_optimize(simulation_data, qos_total, max_iter=700)
+    #     path = 'result/' + str(index_) + '_6_particle_swarm_optimization.pkl'
+    #     data.write_result(path, result_)
+    #     # data.print_array(data.read_result(path))
+    #
+    # # 总用时
+    # print(time.time() - t_begin_)
