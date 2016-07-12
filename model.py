@@ -773,7 +773,7 @@ def improved_ga(matrix_data, adaptive_function, chromosome_mutate_rate=0.2, step
     return procedure
 
 
-def improved_abc(matrix_data, cost_function, onlooker_number=200, limit=10, max_iter=200):
+def improved_abc(matrix_data, cost_function, onlooker_number=50, limit=10, max_iter=200):
     """
     一种改进蜂群算法(在本文中用于对比),
     蜜源和采蜜蜂的数量有data.get_population()方法决定
@@ -797,6 +797,9 @@ def improved_abc(matrix_data, cost_function, onlooker_number=200, limit=10, max_
 
     # 记录算法开始时间戳
     t_begin = time.time()
+
+    # 记录每一代的最优状态
+    procedure = []
 
     # 蜜源
     nectar_source = data.get_population()
@@ -828,8 +831,9 @@ def improved_abc(matrix_data, cost_function, onlooker_number=200, limit=10, max_
         :return:
         """
         k = int(np.random.random() * len(nectar_source))
-        return [(vec_[index_] + int(np.random.random() * (v2 - vec_[index_]) + v_range[1][index_])) % v_range[1][index_]
-                for index_, v2 in enumerate(nectar_source[k])]
+        return [
+            (vec_[index__] + int(np.random.random() * (v2 - vec_[index__]) + v_range[1][index__])) % v_range[1][index__]
+            for index__, v2 in enumerate(nectar_source[k])]
 
     def update_prob_territory():
         """
@@ -914,7 +918,8 @@ def improved_abc(matrix_data, cost_function, onlooker_number=200, limit=10, max_
             if nectar_quantity_best < nectar_quantity_temp:
                 nectar_quantity_best = nectar_quantity_temp
                 nectar_best = vec
-        print(it, nectar_quantity_best, time.time() - t_begin)
+        # print(it, nectar_quantity_best, time.time() - t_begin)
+        procedure.append((nectar_quantity_best, it + 1, time.time() - t_begin))
 
     return nectar_quantity_best, nectar_best
 
@@ -992,11 +997,19 @@ if __name__ == '__main__':
         # data.write_result(path, result_)
         # # data.print_array(data.read_result(path))
 
-        # 测试ABC算法
+        # 测试IGA算法
         print('immune generic algorithm ' + str(index_))
         result_ = immune_genetic_optimize(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
-        print(result_)
-        path = 'result/' + str('index_') + '_7_immune_generic_algorithm.pkl'
+        # print(result_)
+        path = 'result/' + str(index_) + '_7_immune_generic_algorithm.pkl'
+        data.write_result(path, result_)
+        # data.print_array(data.read_result(path))
+
+        # 测试ABC算法
+        print('artificial bee colony ' + str(index_))
+        result_ = improved_abc(simulation_data, qos_total)
+        # print(result_)
+        path = 'result/' + str(index_) + '_8_artificial_bee_colony.pkl'
         data.write_result(path, result_)
         # data.print_array(data.read_result(path))
 
