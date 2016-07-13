@@ -13,25 +13,34 @@ if __name__ == '__main__':
     data_set4 = []
     data_set5 = []
     data_set6 = []
+    data_set7 = []
+    data_set8 = []
     for index in range(1, 21):
         path1 = '../result/' + str(index) + '_1_random_search.pkl'
         path2 = '../result/' + str(index) + '_2_random_restart_hill_climbing.pkl'
         path3 = '../result/' + str(index) + '_3_simulated_annealing.pkl'
-        path4 = '../result/' + str(index) + '_4_improved_generic_algorithm.pkl'
-        path5 = '../result/' + str(index) + '_5_generic_algorithm.pkl'
+        path4 = '../result/' + str(index) + '_4_improved_genetic_algorithm.pkl'
+        path5 = '../result/' + str(index) + '_5_genetic_algorithm.pkl'
         path6 = '../result/' + str(index) + '_6_particle_swarm_optimization.pkl'
+        path7 = '../result/' + str(index) + '_7_immune_genetic_algorithm.pkl'
+        path8 = '../result/' + str(index) + '_8_artificial_bee_colony.pkl'
         data_set1.append(data.read_result(path1))
         data_set2.append(data.read_result(path2))
         data_set3.append(data.read_result(path3))
         data_set4.append(data.read_result(path4))
         data_set5.append(data.read_result(path5))
         data_set6.append(data.read_result(path6))
+        data_set7.append(data.read_result(path7))
+        data_set8.append(data.read_result(path8))
     # data.print_array(data_set4)
 
     step = 5
     dot4 = [0 for i in range(len(data_set4[0]) / step)]
     dot5 = [0 for i in range(len(data_set5[0]) / step)]
     dot6 = [0 for i in range(len(data_set6[0]) / step)]
+    dot7 = [0 for i in range(len(data_set7[0]) / step)]
+    dot8 = [0 for i in range(len(data_set8[0]) / step)]
+
     for i in range(len(data_set4)):
         for j in range(len(data_set4[i])):
             if (j + 1) % step == 0:
@@ -47,12 +56,24 @@ if __name__ == '__main__':
             if (j + 1) % step == 0:
                 dot6[j / step] += data_set6[i][j][0][1]
 
+    for i in range(len(data_set7)):
+        for j in range(len(data_set7[i])):
+            if (j + 1) % step == 0:
+                dot7[j / step] += data_set7[i][j][0][1]
+
+    for i in range(len(data_set8)):
+        for j in range(len(data_set8[i])):
+            if (j + 1) % step == 0:
+                dot8[j / step] += data_set8[i][j][0]
+
     # plt.title(u'20次试验100次迭代内的平均收敛情况')
 
     # x坐标数组,y坐标数组,形状
-    plt.plot([x for x in range(1, 5 * len(dot4), 5)], [n / len(data_set4) for n in dot4], 'p-', label=u'Improved GA')
-    plt.plot([x for x in range(1, 5 * len(dot5), 5)], [n / len(data_set5) for n in dot5], 's-', label=u'GA')
+    plt.plot([x for x in range(1, 5 * len(dot4), 5)], [n / len(data_set4) for n in dot4], 's-', label=u'Improved GA')
+    plt.plot([x for x in range(1, 5 * len(dot5), 5)], [n / len(data_set5) for n in dot5], 'p-', label=u'GA')
     plt.plot([x for x in range(1, 5 * len(dot6), 5)], [n / len(data_set6) for n in dot6], 'o-', label=u'PSO')
+    plt.plot([x for x in range(1, 5 * len(dot7), 5)], [n / len(data_set6) for n in dot7], 'd-', label=u'Immune GA')
+    plt.plot([x for x in range(1, 5 * len(dot8), 5)], [n / len(data_set6) for n in dot8], '>-', label=u'ABC')
     # x轴范围,y轴范围
     plt.axis([1, 97, 3, 6])
     # y轴文字

@@ -161,5 +161,5 @@ if __name__ == '__main__':
     #     path = dt_path(j)
     #     simulation_data = generate_df(_length=length)
     #     simulation_data.to_csv(path)
-    # generate_population(get_simulation_data(), 200)
-    get_population()
+    generate_population(get_simulation_data(), 200)
+    print(len(get_population()))
