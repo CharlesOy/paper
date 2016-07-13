@@ -773,7 +773,7 @@ def improved_ga(matrix_data, adaptive_function, chromosome_mutate_rate=0.2, step
     return procedure
 
 
-def improved_abc(matrix_data, cost_function, onlooker_number=50, limit=10, max_iter=200):
+def improved_abc(matrix_data, cost_function, onlooker_number=500, limit=10, max_iter=50):
     """
     一种改进蜂群算法(在本文中用于对比),
     蜜源和采蜜蜂的数量有data.get_population()方法决定
@@ -864,7 +864,6 @@ def improved_abc(matrix_data, cost_function, onlooker_number=50, limit=10, max_i
             return vec_new_, nectar_quantity_new_, True
         return vec_old_, nectar_quantity_old_, False
 
-    nectar_quantity_best = 0
     nectar_best = nectar_source[0]
     for it in range(max_iter):
         # 采蜜蜂随机寻找新的蜜源,贪婪思想更新蜜源(设置含蜜量更多的蜜源为新蜜源)
@@ -897,9 +896,9 @@ def improved_abc(matrix_data, cost_function, onlooker_number=50, limit=10, max_i
             nectar_source[index], nectar_quantity_temp, changed = search_nectar(vec, nectar_new)
             # 记录蜜源不变的迭代次数
             if changed:
-                iter_times[i] = 0
+                iter_times[index] = 0
             else:
-                iter_times[i] += 1
+                iter_times[index] += 1
 
         # 采蜜蜂是否需要成为侦查蜂重新侦查新的蜜源,根据蜜源不变的迭代次数和limit参数确实定否侦查
         for i in range(len(iter_times)):
@@ -918,10 +917,10 @@ def improved_abc(matrix_data, cost_function, onlooker_number=50, limit=10, max_i
             if nectar_quantity_best < nectar_quantity_temp:
                 nectar_quantity_best = nectar_quantity_temp
                 nectar_best = vec
-        # print(it, nectar_quantity_best, time.time() - t_begin)
-        procedure.append((nectar_quantity_best, it + 1, time.time() - t_begin))
+        # print(nectar_quantity_best, it + 1, time.time() - t_begin)
+        procedure.append((nectar_quantity_best, it + 1,  time.time() - t_begin))
 
-    return nectar_quantity_best, nectar_best
+    return procedure
 
 
 if __name__ == '__main__':
@@ -977,16 +976,16 @@ if __name__ == '__main__':
         # # print(data.read_result(path))
         #
         # # 改进后的遗传算法
-        # print('improved generic algorithm ' + str(index_))
+        # print('improved genetic algorithm ' + str(index_))
         # result_ = improved_ga(simulation_data, qos_total, max_iter=100, threshold_mutate_prob=0.95)
-        # path = 'result/' + str(index_) + '_4_improved_generic_algorithm.pkl'
+        # path = 'result/' + str(index_) + '_4_improved_genetic_algorithm.pkl'
         # data.write_result(path, result_)
         # # data.print_array(data.read_result(path))
         #
         # # 遗传算法
-        # print('generic algorithm ' + str(index_))
+        # print('genetic algorithm ' + str(index_))
         # result_ = genetic_optimize(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
-        # path = 'result/' + str(index_) + '_5_generic_algorithm.pkl'
+        # path = 'result/' + str(index_) + '_5_genetic_algorithm.pkl'
         # data.write_result(path, result_)
         # # data.print_array(data.read_result(path))
         #
@@ -998,10 +997,10 @@ if __name__ == '__main__':
         # # data.print_array(data.read_result(path))
 
         # 测试IGA算法
-        print('immune generic algorithm ' + str(index_))
+        print('immune genetic algorithm ' + str(index_))
         result_ = immune_genetic_optimize(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
         # print(result_)
-        path = 'result/' + str(index_) + '_7_immune_generic_algorithm.pkl'
+        path = 'result/' + str(index_) + '_7_immune_genetic_algorithm.pkl'
         data.write_result(path, result_)
         # data.print_array(data.read_result(path))
 

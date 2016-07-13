@@ -13,19 +13,26 @@ if __name__ == '__main__':
     data_set4 = []
     data_set5 = []
     data_set6 = []
+    data_set7 = []
+    data_set8 = []
     for index in range(1, 21):
         path1 = '../result/' + str(index) + '_1_random_search.pkl'
         path2 = '../result/' + str(index) + '_2_random_restart_hill_climbing.pkl'
         path3 = '../result/' + str(index) + '_3_simulated_annealing.pkl'
-        path4 = '../result/' + str(index) + '_4_improved_generic_algorithm.pkl'
-        path5 = '../result/' + str(index) + '_5_generic_algorithm.pkl'
+        path4 = '../result/' + str(index) + '_4_improved_genetic_algorithm.pkl'
+        path5 = '../result/' + str(index) + '_5_genetic_algorithm.pkl'
         path6 = '../result/' + str(index) + '_6_particle_swarm_optimization.pkl'
+        path7 = '../result/' + str(index) + '_7_immune_genetic_algorithm.pkl'
+        path8 = '../result/' + str(index) + '_8_artificial_bee_colony.pkl'
         data_set1.append(data.read_result(path1))
         data_set2.append(data.read_result(path2))
         data_set3.append(data.read_result(path3))
         data_set4.append(data.read_result(path4))
         data_set5.append(data.read_result(path5))
         data_set6.append(data.read_result(path6))
+        data_set7.append(data.read_result(path7))
+        data_set8.append(data.read_result(path8))
+
     # for exp in data_set4:
     # data.print_array(data_set4[0], True)
 
@@ -65,12 +72,38 @@ if __name__ == '__main__':
                 break
             last = data[:]
 
+    # 获取免疫遗传算法的收敛用迭代次数
+    generation7 = []
+    for cur in data_set7:
+        temp = list(reversed(cur))
+        temp_val = temp[0][0][1]
+        last = None
+        for data in temp:
+            if data[0][1] != temp_val:
+                generation7.append(last[1])
+                break
+            last = data[:]
+
+    # 获取粒子群优化算法的收敛用迭代次数
+    generation8 = []
+    for cur in data_set8:
+        temp = list(reversed(cur))
+        temp_val = temp[0][0]
+        last = None
+        for data in temp:
+            if data[0] != temp_val:
+                generation8.append(last[1])
+                break
+            last = data[:]
+
     # plt.title(u'20次试验中各算法的收敛代数')
 
     # x坐标数组,y坐标数组,形状
-    plt.plot([x for x in range(1, 21)], generation4, 'p-', label=u'Improved GA')
-    plt.plot([x for x in range(1, 21)], generation5, 's-', label=u'GA')
+    plt.plot([x for x in range(1, 21)], generation4, 's-', label=u'Improved GA')
+    plt.plot([x for x in range(1, 21)], generation5, 'p-', label=u'GA')
     plt.plot([x for x in range(1, 21)], generation6, 'o-', label=u'PSO')
+    plt.plot([x for x in range(1, 21)], generation7, 'd-', label=u'Immune GA')
+    plt.plot([x for x in range(1, 21)], generation8, '>-', label=u'ABC')
     # x轴范围,y轴范围
     plt.axis([1, 20, 0, 800])
     # y轴文字
