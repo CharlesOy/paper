@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 
-time_de_noise = [35.026, 65.670, 119.359, 210.036, 241.289, 238.413, 253.778, 241.353, 257.323, 228.83]
+time_pearson = [80.539, 129.841, 156.452, 223.789, 274.803, 318.888, 362.025, 438.480, 434.690, 472.400]
 
-plt.plot([(x + 1) * 10 for x in range(10)], time_de_noise, 'v-')
+plt.plot([(x + 1) * 10 for x in range(10)], time_pearson, 'v-')
 # x轴范围,y轴范围
-plt.axis([10, 100, 0, 300])
+plt.axis([10, 100, 0, 500])
 # y轴文字
 plt.ylabel(u'Time per request(m)')
 # x轴文字
