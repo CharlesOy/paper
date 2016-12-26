@@ -103,7 +103,7 @@ if __name__ == '__main__':
     plt.plot([x for x in range(1, 21)], generation5, 'p-', label=u'GA')
     plt.plot([x for x in range(1, 21)], generation6, 'o-', label=u'PSO')
     plt.plot([x for x in range(1, 21)], generation7, 'd-', label=u'Immune GA')
-    plt.plot([x for x in range(1, 21)], generation8, '>-', label=u'ABC')
+    plt.plot([x for x in range(1, 21)], generation8, '>-', label=u'Improved ABC')
     # x轴范围,y轴范围
     plt.axis([1, 20, 0, 800])
     # y轴文字

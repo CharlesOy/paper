@@ -108,10 +108,10 @@ if __name__ == '__main__':
     plt.plot([x for x in range(1, 21)], time5, 'p-', label=u'GA')
     plt.plot([x for x in range(1, 21)], time6, 'o-', label=u'PSO')
     plt.plot([x for x in range(1, 21)], time7, 'd-', label=u'Immune GA')
-    plt.plot([x for x in range(1, 21)], time8, '>-', label=u'ABC')
+    plt.plot([x for x in range(1, 21)], time8, '>-', label=u'Improved ABC')
     plt.plot([x for x in range(1, 21)], [data_set3[y][2] for y in range(0, 20)], 'v-', label=u'SA')
     # x轴范围,y轴范围
-    plt.axis([1, 20, 0, 500])
+    plt.axis([1, 20, 0, 600])
     # y轴文字
     plt.ylabel(u'Time(s)')
     # x轴文字

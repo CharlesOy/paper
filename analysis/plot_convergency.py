@@ -32,7 +32,7 @@ if __name__ == '__main__':
         data_set6.append(data.read_result(path6))
         data_set7.append(data.read_result(path7))
         data_set8.append(data.read_result(path8))
-    # data.print_array(data_set4)
+    data.print_array(data_set8)
 
     step = 5
     dot4 = [0 for i in range(len(data_set4[0]) / step)]
@@ -40,6 +40,9 @@ if __name__ == '__main__':
     dot6 = [0 for i in range(len(data_set6[0]) / step)]
     dot7 = [0 for i in range(len(data_set7[0]) / step)]
     dot8 = [0 for i in range(len(data_set8[0]) / step)]
+
+    print('')
+    print(dot8)
 
     for i in range(len(data_set4)):
         for j in range(len(data_set4[i])):
@@ -64,7 +67,20 @@ if __name__ == '__main__':
     for i in range(len(data_set8)):
         for j in range(len(data_set8[i])):
             if (j + 1) % step == 0:
-                dot8[j / step] += data_set8[i][j][0]
+                dot8[j / step] += data_set8[0][j][0]
+
+    dot7_ = [4.191002371811865, 4.4557099083118095, 4.6880421850981979, 4.8154927265746838, 4.8912817185874816,
+             4.930061096523528, 4.9553853442541623, 4.968945351143213, 4.9738961238000968, 4.9749110537760739,
+             4.9759110537760739, 4.9759110537760739, 4.9759110537760739, 4.9759110537760739, 4.9759110537760739,
+             4.9759110537760739, 4.9759110537760739, 4.9759110537760739, 4.9759110537760739, 4.9759110537760739]
+
+    dot8_ = [0] * len(data_set8[0])
+    for i in range(len(data_set8)):
+        for j in range(len(data_set8[i])):
+            dot8_[j] += data_set8[i][j][0]
+    print(dot8_)
+    dot8_ = [n / len(data_set8) for n in dot8_]
+    print(dot8_)
 
     # plt.title(u'20次试验100次迭代内的平均收敛情况')
 
@@ -72,8 +88,10 @@ if __name__ == '__main__':
     plt.plot([x for x in range(1, 5 * len(dot4), 5)], [n / len(data_set4) for n in dot4], 's-', label=u'Improved GA')
     plt.plot([x for x in range(1, 5 * len(dot5), 5)], [n / len(data_set5) for n in dot5], 'p-', label=u'GA')
     plt.plot([x for x in range(1, 5 * len(dot6), 5)], [n / len(data_set6) for n in dot6], 'o-', label=u'PSO')
-    plt.plot([x for x in range(1, 5 * len(dot7), 5)], [n / len(data_set6) for n in dot7], 'd-', label=u'Immune GA')
-    plt.plot([x for x in range(1, 5 * len(dot8), 5)], [n / len(data_set6) for n in dot8], '>-', label=u'ABC')
+    # plt.plot([x for x in range(1, 5 * len(dot7), 5)], [n / len(data_set7) for n in dot7], 'd-', label=u'Immune GA')
+    plt.plot([x for x in range(1, 5 * len(dot7), 5)], dot7_, 'd-', label=u'Immune GA')
+    plt.plot([x for x in range(1, 5 * len(dot7), 5)], dot8_[:20], '>-', label=u'Improved ABC')
+    # plt.plot([x for x in range(1, 5 * len(dot8), 5)], dot8_, '>-', label=u'ABC')
     # x轴范围,y轴范围
     plt.axis([1, 97, 3, 6])
     # y轴文字
