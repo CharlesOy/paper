@@ -918,9 +918,13 @@ def improved_abc(matrix_data, cost_function, onlooker_number=500, limit=10, max_
                 nectar_quantity_best = nectar_quantity_temp
                 nectar_best = vec
         # print(nectar_quantity_best, it + 1, time.time() - t_begin)
-        procedure.append((nectar_quantity_best, it + 1,  time.time() - t_begin))
+        procedure.append((nectar_quantity_best, it + 1, time.time() - t_begin))
 
     return procedure
+
+
+def improved_quantum_ga():
+    print('test')
 
 
 if __name__ == '__main__':
