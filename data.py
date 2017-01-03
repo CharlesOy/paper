@@ -20,6 +20,27 @@ def base_data():
     return pd.read_csv('data/base.data', header=None)
 
 
+def normalize(df):
+    """
+    归一化数据
+    :param df:
+    :return:
+    """
+    for i in range(len(columns)):
+        if i == 0 or i == 1:
+            # 响应时间和花费是越少越好,这里将其处理成原始数据越小,归一化之后的数据越大,便于后续处理
+            df[columns[i]] = np.round(
+                (df[columns[i]].max() - df[columns[i]]) / (df[columns[i]].max() - df[columns[i]].min()), 2)
+        elif i == 4:
+            # 名誉度正常归一化处理
+            df[columns[i]] = np.round(
+                (df[columns[i]] - df[columns[i]].min()) / (df[columns[i]].max() - df[columns[i]].min()), 2)
+        else:
+            # 可用性,可靠性归一化等比例放缩,最小值为0.5,最大值为1
+            df[columns[i]] = np.round(((df[columns[i]] - df[columns[i]].min()) / (
+                df[columns[i]].max() - df[columns[i]].min())) / 2 + 0.5, 2)
+
+
 def generate_df(_length=100):
     """
     生成服从正态分布的数据,
@@ -44,27 +65,6 @@ def generate_df(_length=100):
     normalize(df_result)
 
     return df_result
-
-
-def normalize(df):
-    """
-    归一化数据
-    :param df:
-    :return:
-    """
-    for i in range(len(columns)):
-        if i == 0 or i == 1:
-            # 响应时间和花费是越少越好,这里将其处理成原始数据越小,归一化之后的数据越大,便于后续处理
-            df[columns[i]] = np.round(
-                (df[columns[i]].max() - df[columns[i]]) / (df[columns[i]].max() - df[columns[i]].min()), 2)
-        elif i == 4:
-            # 名誉度正常归一化处理
-            df[columns[i]] = np.round(
-                (df[columns[i]] - df[columns[i]].min()) / (df[columns[i]].max() - df[columns[i]].min()), 2)
-        else:
-            # 可用性,可靠性归一化等比例放缩,最小值为0.5,最大值为1
-            df[columns[i]] = np.round(((df[columns[i]] - df[columns[i]].min()) / (
-                df[columns[i]].max() - df[columns[i]].min())) / 2 + 0.5, 2)
 
 
 def dt_path(i):
@@ -116,26 +116,26 @@ def get_simulation_data():
     return result
 
 
-def write_result(path, data):
+def write_result(_path, data):
     """
     写结果文件到指定路径
-    :param path:
+    :param _path:
     :param data:
     :return:
     """
-    file_output = open(path, 'wb')
+    file_output = open(_path, 'wb')
     pickle.dump(data, file_output)
     file_output.close()
     return
 
 
-def read_result(path):
+def read_result(_path):
     """
     从指定路径读结果文件
-    :param path:
+    :param _path:
     :return:
     """
-    file_input = open(path, 'rb')
+    file_input = open(_path, 'rb')
     data = pickle.load(file_input)
     file_input.close()
     return data
@@ -157,9 +157,9 @@ def print_array(arr, reverse=False):
 
 
 if __name__ == '__main__':
-    # for j in range(class_length):
-    #     path = dt_path(j)
-    #     simulation_data = generate_df(_length=length)
-    #     simulation_data.to_csv(path)
+    for j in range(class_length):
+        path = dt_path(j)
+        simulation_data = generate_df(_length=length)
+        simulation_data.to_csv(path)
     generate_population(get_simulation_data(), 200)
     print(len(get_population()))
