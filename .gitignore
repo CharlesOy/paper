@@ -1,6 +1,5 @@
-/.idea
+.idea
 
-/data
-data.py
+*.data
 
 *.pkl
