@@ -933,14 +933,6 @@ if __name__ == '__main__':
     for j_ in range(data.class_length):
         simulation_data.append(pd.read_csv(data.dt_path(j_), index_col=0))
 
-    # 测试ABC算法
-    # print('artificial bee colony ' + str(index_))
-    result_ = improved_abc(simulation_data, qos_total)
-    # print(result_)
-    path = 'result/X_8_artificial_bee_colony.pkl'
-    data.write_result(path, result_)
-    # data.print_array(data.read_result(path))
-
     '''
     各个算法重复20次试验并保存结果
 
@@ -962,67 +954,67 @@ if __name__ == '__main__':
     t_begin_ = time.time()
     # 实验的种群大小
     population_size_ = 200
-    # for index_ in range(1, 21):
-    #     # 生成初始种群(初始随机解)
-    #     data.generate_population(simulation_data, population_size_)
-    #
-    #     # 随机搜索
-    #     print('random search ' + str(index_))
-    #     result_ = random_optimize(simulation_data, qos_total)
-    #     path = 'result/' + str(index_) + '_1_random_search.pkl'
-    #     data.write_result(path, result_)
-    #     # print(data.read_result(path))
-    #
-    #     # 重复爬山
-    #     print('random restart hill climbing ' + str(index_))
-    #     result_ = random_hill_climbing(simulation_data, qos_total)
-    #     path = 'result/' + str(index_) + '_2_random_restart_hill_climbing.pkl'
-    #     data.write_result(path, result_)
-    #     # print(data.read_result(path))
-    #
-    #     # 重复模拟退火
-    #     print('simulated annealing ' + str(index_))
-    #     result_ = random_simulated_annealing(simulation_data, qos_total)
-    #     path = 'result/' + str(index_) + '_3_simulated_annealing.pkl'
-    #     data.write_result(path, result_)
-    #     # print(data.read_result(path))
-    #
-    #     # 改进后的遗传算法
-    #     print('improved genetic algorithm ' + str(index_))
-    #     result_ = improved_ga(simulation_data, qos_total, max_iter=100, threshold_mutate_prob=0.95)
-    #     path = 'result/' + str(index_) + '_4_improved_genetic_algorithm.pkl'
-    #     data.write_result(path, result_)
-    #     # data.print_array(data.read_result(path))
-    #
-    #     # 遗传算法
-    #     print('genetic algorithm ' + str(index_))
-    #     result_ = genetic_optimize(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
-    #     path = 'result/' + str(index_) + '_5_genetic_algorithm.pkl'
-    #     data.write_result(path, result_)
-    #     # data.print_array(data.read_result(path))
-    #
-    #     # 粒子群优化
-    #     print('particle swarm optimization ' + str(index_))
-    #     result_ = particle_swarm_optimize(simulation_data, qos_total, max_iter=700)
-    #     path = 'result/' + str(index_) + '_6_particle_swarm_optimization.pkl'
-    #     data.write_result(path, result_)
-    #     # data.print_array(data.read_result(path))
-    #
-    #     # 测试IGA算法
-    #     print('immune genetic algorithm ' + str(index_))
-    #     result_ = immune_genetic_optimize(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
-    #     # print(result_)
-    #     path = 'result/' + str(index_) + '_7_immune_genetic_algorithm.pkl'
-    #     data.write_result(path, result_)
-    #     # data.print_array(data.read_result(path))
-    #
-    #     # 测试ABC算法
-    #     print('artificial bee colony ' + str(index_))
-    #     result_ = improved_abc(simulation_data, qos_total)
-    #     # print(result_)
-    #     path = 'result/' + str(index_) + '_8_artificial_bee_colony.pkl'
-    #     data.write_result(path, result_)
-    #     # data.print_array(data.read_result(path))
+    for index_ in range(1, 21):
+        # # 生成初始种群(初始随机解)
+        data.generate_population(simulation_data, population_size_)
+        #
+        # # 随机搜索
+        # print('random search ' + str(index_))
+        # result_ = random_optimize(simulation_data, qos_total)
+        # path = 'result/' + str(index_) + '_1_random_search.pkl'
+        # data.write_result(path, result_)
+        # # print(data.read_result(path))
+        #
+        # # 重复爬山
+        # print('random restart hill climbing ' + str(index_))
+        # result_ = random_hill_climbing(simulation_data, qos_total)
+        # path = 'result/' + str(index_) + '_2_random_restart_hill_climbing.pkl'
+        # data.write_result(path, result_)
+        # # print(data.read_result(path))
+        #
+        # # 重复模拟退火
+        # print('simulated annealing ' + str(index_))
+        # result_ = random_simulated_annealing(simulation_data, qos_total)
+        # path = 'result/' + str(index_) + '_3_simulated_annealing.pkl'
+        # data.write_result(path, result_)
+        # # print(data.read_result(path))
+        #
+        # # 改进后的遗传算法
+        # print('improved genetic algorithm ' + str(index_))
+        # result_ = improved_ga(simulation_data, qos_total, max_iter=100, threshold_mutate_prob=0.95)
+        # path = 'result/' + str(index_) + '_4_improved_genetic_algorithm.pkl'
+        # data.write_result(path, result_)
+        # data.print_array(data.read_result(path))
+        #
+        # # 遗传算法
+        # print('genetic algorithm ' + str(index_))
+        # result_ = genetic_optimize(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
+        # path = 'result/' + str(index_) + '_5_genetic_algorithm.pkl'
+        # data.write_result(path, result_)
+        # # data.print_array(data.read_result(path))
+        #
+        # # 粒子群优化
+        # print('particle swarm optimization ' + str(index_))
+        # result_ = particle_swarm_optimize(simulation_data, qos_total, max_iter=700)
+        # path = 'result/' + str(index_) + '_6_particle_swarm_optimization.pkl'
+        # data.write_result(path, result_)
+        # # data.print_array(data.read_result(path))
+        #
+        # # 测试IGA算法
+        # print('immune genetic algorithm ' + str(index_))
+        # result_ = immune_genetic_optimize(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
+        # # print(result_)
+        # path = 'result/' + str(index_) + '_7_immune_genetic_algorithm.pkl'
+        # data.write_result(path, result_)
+        # # data.print_array(data.read_result(path))
+        #
+        # # 测试ABC算法
+        # print('artificial bee colony ' + str(index_))
+        # result_ = improved_abc(simulation_data, qos_total)
+        # # print(result_)
+        # path = 'result/' + str(index_) + '_8_artificial_bee_colony.pkl'
+        # data.write_result(path, result_)
+        # # data.print_array(data.read_result(path))
 
     # 总用时
     print(time.time() - t_begin_)

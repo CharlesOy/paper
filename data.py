@@ -119,8 +119,8 @@ def get_simulation_data():
 def write_result(_path, data):
     """
     写结果文件到指定路径
-    :param _path:
-    :param data:
+    :param _path: 写文件路径
+    :param data: 数据
     :return:
     """
     file_output = open(_path, 'wb')
@@ -162,4 +162,3 @@ if __name__ == '__main__':
         simulation_data = generate_df(_length=length)
         simulation_data.to_csv(path)
     generate_population(get_simulation_data(), 200)
-    print(len(get_population()))

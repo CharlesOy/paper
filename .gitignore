@@ -3,3 +3,6 @@
 *.data
 
 *.pyc
+*.pkl
+__pycache__/
+result/
