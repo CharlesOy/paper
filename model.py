@@ -1000,7 +1000,7 @@ if __name__ == '__main__':
         # data.write_result(path, result_)
         # # data.print_array(data.read_result(path))
         #
-        # # 测试IGA算法
+        # # 测试免疫遗传算法
         # print('immune genetic algorithm ' + str(index_))
         # result_ = immune_genetic_optimize(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
         # # print(result_)
@@ -1008,7 +1008,7 @@ if __name__ == '__main__':
         # data.write_result(path, result_)
         # # data.print_array(data.read_result(path))
         #
-        # # 测试ABC算法
+        # # 测试人工蜂群算法
         # print('artificial bee colony ' + str(index_))
         # result_ = improved_abc(simulation_data, qos_total)
         # # print(result_)
