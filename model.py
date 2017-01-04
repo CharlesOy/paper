@@ -275,7 +275,7 @@ def ga(matrix_data, adaptive_function, mutate_prob=0.2, step=1, elite_rate=0.2,
        max_iter=100):
     """
     经典遗传算法,
-    采用选择算子采用排序法,
+    选择算子采用排序法,
     变异算子,
     交叉算子采用随机交叉
     :param matrix_data:
@@ -360,196 +360,43 @@ def ga(matrix_data, adaptive_function, mutate_prob=0.2, step=1, elite_rate=0.2,
     return procedure
 
 
-def iga():
+def iga(matrix_data, adaptive_function, mutate_prob=0.2, step=1, elite_rate=0.2,
+        max_iter=100, antigen_rate=0.2):
     """
-
-    :return:
-    """
-    return 'nothing'
-
-
-def improved_pso(matrix_data, adaptive_function, max_iter=100, weight=0.8, c1=2, c2=2):
-    """
-    一种改进的粒子群优化算法
+    经典免疫遗传算法,
+    抽取初代染色体中最佳的antigen百分比个染色体作为抗原,
+    选择算子采用排序法,
+    变异算子,
+    交叉算子采用随机交叉
     :param matrix_data:
     :param adaptive_function:
+    :param mutate_prob:
+    :param step:
+    :param elite_rate:
     :param max_iter:
-    :param weight:
-    :param c1:
-    :param c2:
-    :return:
-    """
-    # 算法开始时间戳
-    t_begin = time.time()
-    # 记录迭代状态
-    procedure = []
-    # 粒子群
-    population = data.get_population()
-    # 随机速度
-    speeds = data.generate_population(matrix_data, len(population))
-    # 每个粒子的最佳纪录
-    best_histories = []
-    # 粒子群的最佳纪录
-    best_of_all = (None, 0)
-    # 初始化每个粒子的最佳纪录
-    for chromosome in population:
-        value_cur = adaptive_function(matrix_data, chromosome)
-        best_histories.append((chromosome, value_cur))
-        if value_cur > best_of_all[1]:
-            best_of_all = (chromosome, value_cur)
-    # 主循环
-    for i in range(max_iter):
-        procedure.append((best_of_all, i + 1, time.time() - t_begin))
-        # print(best_of_all, i)
-        # print(best_histories[0])
-        # print(population[0])
-        # print(speeds[0])
-        # print('')
-        for k in range(len(population)):
-            chromosome = population[k]
-            speed = speeds[k]
-            for m in range(len(chromosome)):
-                # 计算速度
-                speed[m] *= speed[m] * weight
-                speed[m] += c1 * np.random.random() * (best_histories[k][0][m] - chromosome[m])
-                speed[m] += c2 * np.random.random() * (best_of_all[0][m] - chromosome[m])
-                speed[m] = int(round(speed[m])) % matrix_data[m].shape[0]
-                # 计算新的位置
-                chromosome[m] += speed[m]
-                chromosome[m] %= matrix_data[m].shape[0]
-
-                # if chromosome[m] + speed[m] >= matrix_data[m].shape[0]:
-                #     chromosome[m] = matrix_data[m].shape[0] - 1
-                # elif chromosome[m] + speed[m] < 0:
-                #     chromosome[m] = 0
-                # else:
-                #     chromosome[m] += speed[m]
-            value_cur = adaptive_function(matrix_data, chromosome)
-            if value_cur > best_histories[k][1]:
-                best_histories[k] = (chromosome, value_cur)
-            if value_cur > best_of_all[1]:
-                # print('updated')
-                best_of_all = (chromosome[:], value_cur)
-
-    procedure.append((best_of_all, i + 1, time.time() - t_begin))
-
-    return procedure
-
-
-def improved_ga(matrix_data, adaptive_function, chromosome_mutate_rate=0.2, step=1, elite_rate=0.2,
-                max_iter=100, temperature=10000, threshold_mutate_prob=0.1, cooling_rate=0.8):
-    """
-    变异算子经过改进的遗传算法,
-    选择算子采用模拟退火思想,
-    变异算子遍历选取局部最优解,
-    交叉算子采用随机交叉
-    :param matrix_data:目标矩阵
-    :param adaptive_function:适应度函数
-    :param chromosome_mutate_rate: 每次变异时,染色体中有chromosome_mutate_rate的比例的基因将会发生突变
-    :param step:单个基因变异移动步骤
-    :param elite_rate:精英留存率
-    :param max_iter:最大迭代次数
-    :param temperature:温度
-    :param threshold_mutate_prob:最高变异率
-    :param cooling_rate:冷却率
+    :param antigen_rate:
     :return:
     """
 
-    # def mutate(vec):
-    #     """
-    #     变异算子
-    #     :param vec:染色体
-    #     :return:
-    #     """
-    #     m = np.random.randint(0, len(matrix_data))
-    #     cur_vec = vec[0:m] + [(vec[m] - step + matrix_data[m].shape[0]) % matrix_data[m].shape[0]] + vec[m + 1:]
-    #     best_val = adaptive_function(matrix_data, cur_vec)
-    #     # temp = best_val
-    #     best_vec = cur_vec
-    #     for n in range(int(chromosome_mutate_rate * len(vec))):
-    #         m = np.random.randint(0, len(matrix_data))
-    #         if np.random.random() < 0.5:
-    #             # 向下变异,移动step个单位
-    #             cur_vec = vec[0:m] + [(vec[m] - step + matrix_data[m].shape[0]) % matrix_data[m].shape[0]] + vec[m + 1:]
-    #         else:
-    #             # 向上变异,移动step个单位
-    #             cur_vec = vec[0:m] + [(vec[m] + step) % matrix_data[m].shape[0]] + vec[m + 1:]
-    #         cur_val = adaptive_function(matrix_data, cur_vec)
-    #         if cur_val > best_val:
-    #             best_val = cur_val
-    #             best_vec = cur_vec[:]
-    #     # print(temp, best_val)
-    #     return best_vec
-
-    # def mutate2(vec):
-    #     """
-    #     终极大杀器,
-    #     当前模型不好,
-    #     基因之间不相关,
-    #     每个基因都有自己的最佳编码,
-    #     因此只要获取染色体的各个基因位置各自的最佳编码,
-    #     该染色体就是最佳染色体(最优解),
-    #     嘛,写论文的时候我是不会写进去的...哈哈...
-    #     改进过的变异算子
-    #     随机基因位置,
-    #     确定该基因最合适编码
-    #     :param vec:
-    #     :return:
-    #     """
-    #     m = np.random.randint(0, len(matrix_data))
-    #     best_chromosome = 0
-    #     best_v = 0
-    #     for index in range(0, matrix_data[m].shape[0]):
-    #         cur_v = adaptive_function(matrix_data, vec[0:m] + [index] + vec[m + 1:])
-    #         if cur_v > best_v:
-    #             best_v = cur_v
-    #             best_chromosome = vec[0:m] + [index] + vec[m + 1:]
-    #     return best_chromosome
-
-    def mutate(vec, accept_prob=0):
+    def mutate(vec):
         """
-        改进过的变异算子,
-        随机基因位置,
-        确定该基因最合适编码
+        变异算子
         :param vec:
-        :param accept_prob:
         :return:
         """
         m = np.random.randint(0, len(matrix_data))
-        best_val = 0
-        g_index = np.random.randint(0, matrix_data[m].shape[0])
-        best_vec = None
-        while True:
-            cur_vec = vec[0:m] + [g_index] + vec[m + 1:]
-            cur_val = adaptive_function(matrix_data, cur_vec)
-            if best_val < cur_val or np.random.random() < accept_prob:
-                best_val = cur_val
-                best_vec = cur_vec[:]
-            else:
-                break
-        return best_vec
-
-    # def mutate3(vec):
-    #     """
-    #     改进过的变异算子,
-    #     随机基因位置,
-    #     确定该基因最合适编码
-    #     :param vec:
-    #     :return:
-    #     """
-    #     m = np.random.randint(0, len(matrix_data))
-    #     best_val = 0
-    #     g_index = np.random.randint(0, matrix_data[m].shape[0])
-    #     best_vec = None
-    #     while True:
-    #         cur_vec = vec[0:m] + [g_index] + vec[m + 1:]
-    #         cur_val = adaptive_function(matrix_data, cur_vec)
-    #         if best_val < cur_val:
-    #             best_val = cur_val
-    #             best_vec = cur_vec[:]
-    #         else:
-    #             break
-    #     return best_vec
+        if np.random.random() < 0.5:
+            # 染色体变异位置超过下限
+            if vec[m] - step < 0:
+                return vec[0:m] + [0] + vec[m + 1:]
+            # 向下变异,移动step个单位
+            return vec[0:m] + [vec[m] - step] + vec[m + 1:]
+        else:
+            # 染色体变异位置超过上限
+            if vec[m] + step >= matrix_data[m].shape[0]:
+                return vec[0:m] + [matrix_data[m].shape[0] - 1] + vec[m + 1:]
+            # 向上变异,移动step个单位
+            return vec[0:m] + [vec[m] + step] + vec[m + 1:]
 
     def cross_over(r1, r2):
         """
@@ -558,18 +405,113 @@ def improved_ga(matrix_data, adaptive_function, chromosome_mutate_rate=0.2, step
         :param r2:
         :return:
         """
-        result = []
-        for m in range(len(r1)):
-            if np.random.random() > 0.5:
-                result.append(r1[m])
-            else:
-                result.append(r2[m])
-        return result
+        m = np.random.randint(1, len(r1) - 2)
+        return r1[:m] + r2[m:]
 
     # 记录算法开始时间戳
     t_begin = time.time()
+    # 记录迭代过程
+    procedure = []
 
-    # 记录每一代的最优状态
+    # 随机生成初始种群
+    population = data.get_population()
+    population_size = len(population)
+
+    # 精英数
+    top_elite_count = int(elite_rate * population_size)
+
+    # 抗原数
+    antigen_count = int(antigen_rate * population_size)
+    # 抗原
+    antigen = []
+
+    # 主循环迭代
+    for i in range(max_iter):
+        # 获取种群中所有基因的适应度和基因的元组
+        scores = [(gene, adaptive_function(matrix_data, gene)) for gene in population]
+        # 如果不是初代种群，则注射疫苗
+        if i != 0:
+            population.append(antigen)
+        scores.sort(reverse=True, key=operator.itemgetter(1))
+        procedure.append((scores[0], i + 1, time.time() - t_begin))
+        # print(scores[0], i + 1)
+        # print(str(i) + '-------------------')
+        # for score in scores:
+        #     print(score)
+
+        ranked_population = [g for (g, s) in scores]
+
+        # 获取精英基因,淘汰劣质染色体
+        population = ranked_population[:top_elite_count]
+
+        # 如果是初代种群，则抽取疫苗
+        if i == 0:
+            antigen = ranked_population[:antigen_count]
+
+        while len(population) < population_size:
+            if np.random.random() < mutate_prob:
+                # 变异
+                i = np.random.randint(0, top_elite_count)
+                population.append(mutate(ranked_population[i]))
+            else:
+                # 交叉
+                i = np.random.randint(0, top_elite_count)
+                k = np.random.randint(0, top_elite_count)
+                population.append(cross_over(ranked_population[i], ranked_population[k]))
+
+    # 返回收敛后的解元组(适应度,染色体)
+    return procedure
+
+
+def improved_ga(matrix_data, adaptive_function, mutate_prob=0.2, step=1, elite_rate=0.2,
+                max_iter=100):
+    """
+    经典遗传算法,
+    选择算子采用排序法,
+    变异算子,
+    交叉算子采用随机交叉
+    :param matrix_data:
+    :param adaptive_function:
+    :param mutate_prob:
+    :param step:
+    :param elite_rate:
+    :param max_iter:
+    :return:
+    """
+
+    def mutate(vec):
+        """
+        变异算子
+        :param vec:
+        :return:
+        """
+        m = np.random.randint(0, len(matrix_data))
+        if np.random.random() < 0.5:
+            # 染色体变异位置超过下限
+            if vec[m] - step < 0:
+                return vec[0:m] + [0] + vec[m + 1:]
+            # 向下变异,移动step个单位
+            return vec[0:m] + [vec[m] - step] + vec[m + 1:]
+        else:
+            # 染色体变异位置超过上限
+            if vec[m] + step >= matrix_data[m].shape[0]:
+                return vec[0:m] + [matrix_data[m].shape[0] - 1] + vec[m + 1:]
+            # 向上变异,移动step个单位
+            return vec[0:m] + [vec[m] + step] + vec[m + 1:]
+
+    def cross_over(r1, r2):
+        """
+        交叉算子
+        :param r1:
+        :param r2:
+        :return:
+        """
+        m = np.random.randint(1, len(r1) - 2)
+        return r1[:m] + r2[m:]
+
+    # 记录算法开始时间戳
+    t_begin = time.time()
+    # 记录迭代过程
     procedure = []
 
     # 随机生成初始种群
@@ -590,30 +532,23 @@ def improved_ga(matrix_data, adaptive_function, chromosome_mutate_rate=0.2, step
         # for score in scores:
         #     print(score)
 
-        ranked_population = [g for (g, v) in scores]
+        ranked_population = [g for (g, s) in scores]
 
-        # 动态计算变异率,模拟退火算法计算变异率,如得到的变异率大于设定的最低变异率,则按最低变异率按最大变异率计算
-        population = ranked_population[:top_elite_count]
-        mutate_prob = 1 - pow(math.e, -(scores[top_elite_count - 1][1] - scores[0][1])) / temperature
-        if threshold_mutate_prob > mutate_prob:
-            mutate_prob = threshold_mutate_prob
-        else:
-            # 降温
-            temperature *= cooling_rate
         # 获取精英基因,淘汰劣质染色体
+        population = ranked_population[:top_elite_count]
+
         while len(population) < population_size:
             if np.random.random() < mutate_prob:
                 # 变异
                 i = np.random.randint(0, top_elite_count)
-                population.append(mutate(ranked_population[i], 1 - mutate_prob))
+                population.append(mutate(ranked_population[i]))
             else:
                 # 交叉
                 i = np.random.randint(0, top_elite_count)
                 k = np.random.randint(0, top_elite_count)
                 population.append(cross_over(ranked_population[i], ranked_population[k]))
 
-                # 返回收敛后的解元组(适应度,染色体)
-    # 返回的元组((解,值),代数,运行时间)
+    # 返回收敛后的解元组(适应度,染色体)
     return procedure
 
 
@@ -635,6 +570,15 @@ def hybrid_ga(matrix_data, adaptive_function, chromosome_mutate_rate=0.2, step=1
     :param cooling_rate:冷却率
     :return:
     """
+
+    def generate_data():
+        """
+        赌轮盘算法生成初始数据
+        :return:
+        """
+        # ###################### 分割线 #######################
+        # TBD
+        # ###################### 分割线 #######################
 
     # def mutate(vec):
     #     """
@@ -799,7 +743,7 @@ def hybrid_ga(matrix_data, adaptive_function, chromosome_mutate_rate=0.2, step=1
 
 
 def improved_iga(matrix_data, adaptive_function, mutate_prob=0.2, step=1, elite_rate=0.2,
-                            max_iter=100, alpha=0.2, beta=0.8, gate=0.3):
+                 max_iter=100, alpha=0.2, beta=0.8, gate=0.3):
     """
     免疫遗传算法,
     采用选择算子采用排序法,
@@ -959,6 +903,75 @@ def improved_iga(matrix_data, adaptive_function, mutate_prob=0.2, step=1, elite_
                 population.append(cross_over(ranked_population[i], ranked_population[k]))
 
     # 返回收敛后的解元组(适应度,染色体)
+    return procedure
+
+
+def improved_pso(matrix_data, adaptive_function, max_iter=100, weight=0.8, c1=2, c2=2):
+    """
+    一种改进的粒子群优化算法
+    :param matrix_data:
+    :param adaptive_function:
+    :param max_iter:
+    :param weight:
+    :param c1:
+    :param c2:
+    :return:
+    """
+    # 算法开始时间戳
+    t_begin = time.time()
+    # 记录迭代状态
+    procedure = []
+    # 粒子群
+    population = data.get_population()
+    # 随机速度
+    speeds = data.generate_population(matrix_data, len(population))
+    # 每个粒子的最佳纪录
+    best_histories = []
+    # 粒子群的最佳纪录
+    best_of_all = (None, 0)
+    # 初始化每个粒子的最佳纪录
+    for chromosome in population:
+        value_cur = adaptive_function(matrix_data, chromosome)
+        best_histories.append((chromosome, value_cur))
+        if value_cur > best_of_all[1]:
+            best_of_all = (chromosome, value_cur)
+    # 主循环
+    i = 0
+    for i in range(max_iter):
+        procedure.append((best_of_all, i + 1, time.time() - t_begin))
+        # print(best_of_all, i)
+        # print(best_histories[0])
+        # print(population[0])
+        # print(speeds[0])
+        # print('')
+        for k in range(len(population)):
+            chromosome = population[k]
+            speed = speeds[k]
+            for m in range(len(chromosome)):
+                # 计算速度
+                speed[m] *= speed[m] * weight
+                speed[m] += c1 * np.random.random() * (best_histories[k][0][m] - chromosome[m])
+                speed[m] += c2 * np.random.random() * (best_of_all[0][m] - chromosome[m])
+                speed[m] = int(round(speed[m])) % matrix_data[m].shape[0]
+                # 计算新的位置
+                chromosome[m] += speed[m]
+                chromosome[m] %= matrix_data[m].shape[0]
+
+                # if chromosome[m] + speed[m] >= matrix_data[m].shape[0]:
+                #     chromosome[m] = matrix_data[m].shape[0] - 1
+                # elif chromosome[m] + speed[m] < 0:
+                #     chromosome[m] = 0
+                # else:
+                #     chromosome[m] += speed[m]
+            value_cur = adaptive_function(matrix_data, chromosome)
+            if value_cur > best_histories[k][1]:
+                best_histories[k] = (chromosome, value_cur)
+            if value_cur > best_of_all[1]:
+                # print('updated')
+                best_of_all = (chromosome[:], value_cur)
+
+    procedure.append((best_of_all, i + 1, time.time() - t_begin))
+
     return procedure
 
 
@@ -1144,7 +1157,7 @@ if __name__ == '__main__':
     # 实验的种群大小
     population_size_ = 200
     for index_ in range(1, 21):
-        # # 生成初始种群(初始随机解)
+        # 生成初始种群(初始随机解)
         data.generate_population(simulation_data, population_size_)
 
         # # 随机搜索
@@ -1180,9 +1193,10 @@ if __name__ == '__main__':
         result_ = iga(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
         path = 'result/' + str(index_) + '_5_genetic_algorithm.pkl'
         data.write_result(path, result_)
-        # data.print_array(data.read_result(path))
+        data.print_array(data.read_result(path))
 
         # 混合免疫算法
+        # 混合免疫算法对生成初始种群采用了优化，不使用随机生成方法
         print('hybrid genetic algorithm ' + str(index_))
         result_ = hybrid_ga(simulation_data, qos_total, max_iter=100, threshold_mutate_prob=0.95)
         path = 'result/' + str(index_) + '_6_improved_genetic_algorithm.pkl'
@@ -1191,7 +1205,7 @@ if __name__ == '__main__':
 
         # 改进遗传算法
         print('improved genetic algorithm ' + str(index_))
-        result_ = improved_ga(simulation_data, qos_total, max_iter=100, threshold_mutate_prob=0.95)
+        result_ = improved_ga(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
         path = 'result/' + str(index_) + '_7_improved_genetic_algorithm.pkl'
         data.write_result(path, result_)
         data.print_array(data.read_result(path))

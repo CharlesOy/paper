@@ -17,7 +17,7 @@ def base_data():
     获取真实数据作为基本数据
     :return:
     """
-    return pd.read_csv('data/base.data', header=None)
+    return pd.read_csv('basic_data/base.data', header=None)
 
 
 def normalize(df):
@@ -73,7 +73,7 @@ def dt_path(i):
     :param i:
     :return:
     """
-    base_path = 'data/simulation_class'
+    base_path = 'basic_data/simulation_class'
     return base_path + str(i) + '.data'
 
 
@@ -93,7 +93,7 @@ def generate_population(matrix_data, population_size):
                for k in range(len(matrix_data))]
         population.append(vec)
     df = pd.DataFrame(population)
-    df.to_csv('data/population.data')
+    df.to_csv('basic_data/population.data')
     return population
 
 
@@ -102,7 +102,7 @@ def get_population():
     读取种群数据
     :return:
     """
-    return [list(t) for t in pd.read_csv('data/population.data', index_col=0).to_records(index=False)]
+    return [list(t) for t in pd.read_csv('basic_data/population.data', index_col=0).to_records(index=False)]
 
 
 def get_simulation_data():
