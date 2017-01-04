@@ -1193,7 +1193,7 @@ if __name__ == '__main__':
         result_ = iga(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
         path = 'result/' + str(index_) + '_5_genetic_algorithm.pkl'
         data.write_result(path, result_)
-        data.print_array(data.read_result(path))
+        # data.print_array(data.read_result(path))
 
         # 混合免疫算法
         # 混合免疫算法对生成初始种群采用了优化，不使用随机生成方法
@@ -1201,14 +1201,14 @@ if __name__ == '__main__':
         result_ = hybrid_ga(simulation_data, qos_total, max_iter=100, threshold_mutate_prob=0.95)
         path = 'result/' + str(index_) + '_6_improved_genetic_algorithm.pkl'
         data.write_result(path, result_)
-        data.print_array(data.read_result(path))
+        # data.print_array(data.read_result(path))
 
         # 改进遗传算法
         print('improved genetic algorithm ' + str(index_))
         result_ = improved_ga(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
         path = 'result/' + str(index_) + '_7_improved_genetic_algorithm.pkl'
         data.write_result(path, result_)
-        data.print_array(data.read_result(path))
+        # data.print_array(data.read_result(path))
 
         # 改进免疫算法
         print('improved immune genetic algorithm ' + str(index_))
