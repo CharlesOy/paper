@@ -16,14 +16,14 @@ if __name__ == '__main__':
     data_set7 = []
     data_set8 = []
     for index in range(1, 21):
-        path1 = '../result/' + str(index) + '_1_random_search.pkl'
-        path2 = '../result/' + str(index) + '_2_random_restart_hill_climbing.pkl'
-        path3 = '../result/' + str(index) + '_3_simulated_annealing.pkl'
-        path4 = '../result/' + str(index) + '_4_improved_genetic_algorithm.pkl'
-        path5 = '../result/' + str(index) + '_5_genetic_algorithm.pkl'
-        path6 = '../result/' + str(index) + '_6_particle_swarm_optimization.pkl'
-        path7 = '../result/' + str(index) + '_7_immune_genetic_algorithm.pkl'
-        path8 = '../result/' + str(index) + '_8_artificial_bee_colony.pkl'
+        path1 = '../../result/' + str(index) + '_1_random_search.pkl'
+        path2 = '../../result/' + str(index) + '_2_random_restart_hill_climbing.pkl'
+        path3 = '../../result/' + str(index) + '_3_simulated_annealing.pkl'
+        path4 = '../../result/' + str(index) + '_4_improved_genetic_algorithm.pkl'
+        path5 = '../../result/' + str(index) + '_5_genetic_algorithm.pkl'
+        path6 = '../../result/' + str(index) + '_6_particle_swarm_optimization.pkl'
+        path7 = '../../result/' + str(index) + '_7_immune_genetic_algorithm.pkl'
+        path8 = '../../result/' + str(index) + '_8_artificial_bee_colony.pkl'
         data_set1.append(data.read_result(path1))
         data_set2.append(data.read_result(path2))
         data_set3.append(data.read_result(path3))
