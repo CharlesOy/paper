@@ -7,6 +7,25 @@ import operator
 import data
 
 
+# ###################### 分割线 #######################
+# 线性
+# ###################### 分割线 #######################
+# ----------------------------------------------------
+# ###################### 分割线 #######################
+
+
+# ###################### 分割线 #######################
+# 复合模型
+# ###################### 分割线 #######################
+#         - 5 -
+#        /      \
+#   2 - 3  并列   7 -----------------------------------
+#  /     \      /|
+# 1  选择  - 6 - /
+#  \           /
+#   4 - 5 -----
+# ###################### 分割线 #######################
+
 def qos_time(matrix_data, gene):
     """
     QoS之一,计算Web服务质量的服务器响应时间因素
@@ -15,8 +34,23 @@ def qos_time(matrix_data, gene):
     :return:
     """
     score = 0
-    for i in range(len(gene)):
+
+    # ###################### 分割线 #######################
+    # 线性
+    # ###################### 分割线 #######################
+    # for i in range(len(gene)):
+    #     score += matrix_data[i][data.columns[0]][gene[i]]
+
+    # ###################### 分割线 #######################
+    # 复合模型
+    # ###################### 分割线 #######################
+    score += matrix_data[0][data.columns[0]][gene[0]]
+    score += (matrix_data[1][data.columns[0]][gene[1]] + matrix_data[2][data.columns[0]][gene[2]]) / 2
+    score += (matrix_data[3][data.columns[0]][gene[3]] + matrix_data[4][data.columns[0]][gene[4]]) / 2
+    score += max(matrix_data[3][data.columns[0]][gene[5]], matrix_data[4][data.columns[0]][gene[6]])
+    for i in range(7, len(gene)):
         score += matrix_data[i][data.columns[0]][gene[i]]
+
     return score
 
 
@@ -28,7 +62,20 @@ def qos_cost(matrix_data, gene):
     :return:
     """
     score = 0
-    for i in range(len(gene)):
+
+    # ###################### 分割线 #######################
+    # 线性
+    # ###################### 分割线 #######################
+    # for i in range(len(gene)):
+    #     score += matrix_data[i][data.columns[1]][gene[i]]
+
+    # ###################### 分割线 #######################
+    # 复合模型
+    # ###################### 分割线 #######################
+    score += matrix_data[0][data.columns[1]][gene[0]]
+    score += (matrix_data[1][data.columns[1]][gene[1]] + matrix_data[2][data.columns[1]][gene[2]]) / 2
+    score += (matrix_data[3][data.columns[1]][gene[3]] + matrix_data[4][data.columns[1]][gene[4]]) / 2
+    for i in range(5, len(gene)):
         score += matrix_data[i][data.columns[1]][gene[i]]
     return score
 
@@ -41,7 +88,20 @@ def qos_availability(matrix_data, gene):
     :return:
     """
     score = 1
-    for i in range(len(gene)):
+
+    # ###################### 分割线 #######################
+    # 线性
+    # ###################### 分割线 #######################
+    # for i in range(len(gene)):
+    #     score *= matrix_data[i][data.columns[2]][gene[i]]
+
+    # ###################### 分割线 #######################
+    # 复合模型
+    # ###################### 分割线 #######################
+    score *= matrix_data[0][data.columns[2]][gene[0]]
+    score += (matrix_data[1][data.columns[2]][gene[1]] * matrix_data[2][data.columns[2]][gene[2]]) / 2 + \
+             (matrix_data[3][data.columns[2]][gene[3]] * matrix_data[4][data.columns[2]][gene[4]]) / 2
+    for i in range(5, len(gene)):
         score *= matrix_data[i][data.columns[2]][gene[i]]
     return score
 
@@ -54,7 +114,20 @@ def qos_reliability(matrix_data, gene):
     :return:
     """
     score = 1
-    for i in range(len(gene)):
+
+    # ###################### 分割线 #######################
+    # 线性
+    # ###################### 分割线 #######################
+    # for i in range(len(gene)):
+    #     score *= matrix_data[i][data.columns[3]][gene[i]]
+
+    # ###################### 分割线 #######################
+    # 复合模型
+    # ###################### 分割线 #######################
+    score *= matrix_data[0][data.columns[3]][gene[0]]
+    score += (matrix_data[1][data.columns[3]][gene[1]] * matrix_data[2][data.columns[3]][gene[2]]) / 2 + \
+             (matrix_data[3][data.columns[3]][gene[3]] * matrix_data[4][data.columns[3]][gene[4]]) / 2
+    for i in range(5, len(gene)):
         score *= matrix_data[i][data.columns[3]][gene[i]]
     return score
 
@@ -67,8 +140,21 @@ def qos_reputation(matrix_data, gene):
     :return:
     """
     score = 1
-    for i in range(len(gene)):
-        score += matrix_data[i][data.columns[3]][gene[i]]
+
+    # ###################### 分割线 #######################
+    # 线性
+    # ###################### 分割线 #######################
+    # for i in range(len(gene)):
+    #     score += matrix_data[i][data.columns[4]][gene[i]]
+
+    # ###################### 分割线 #######################
+    # 复合模型
+    # ###################### 分割线 #######################
+    score += matrix_data[0][data.columns[4]][gene[0]]
+    score += (matrix_data[1][data.columns[4]][gene[1]] + matrix_data[2][data.columns[4]][gene[2]]) / 2 + \
+             (matrix_data[3][data.columns[4]][gene[3]] + matrix_data[4][data.columns[4]][gene[4]]) / 2
+    for i in range(5, len(gene)):
+        score += matrix_data[i][data.columns[4]][gene[i]]
     return score / len(gene)
 
 
@@ -79,6 +165,9 @@ def qos_total(matrix_data, gene):
     :param gene:
     :return:
     """
+    # ###################### 分割线 #######################
+    #
+    # ###################### 分割线 #######################
     result = 0.1 * qos_time(matrix_data, gene)
     result += 0.1 * qos_cost(matrix_data, gene)
     result += 0.3 * qos_availability(matrix_data, gene)
@@ -1191,7 +1280,7 @@ if __name__ == '__main__':
         # 免疫遗传算法
         print('immune genetic algorithm ' + str(index_))
         result_ = iga(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
-        path = 'result/' + str(index_) + '_5_genetic_algorithm.pkl'
+        path = 'result2/' + str(index_) + '_5_immune_genetic_algorithm.pkl'
         data.write_result(path, result_)
         # data.print_array(data.read_result(path))
 
@@ -1199,14 +1288,14 @@ if __name__ == '__main__':
         # 混合免疫算法对生成初始种群采用了优化，不使用随机生成方法
         print('hybrid genetic algorithm ' + str(index_))
         result_ = hybrid_ga(simulation_data, qos_total, max_iter=100, threshold_mutate_prob=0.95)
-        path = 'result/' + str(index_) + '_6_improved_genetic_algorithm.pkl'
+        path = 'result2/' + str(index_) + '_6_hybrid_genetic_algorithm.pkl'
         data.write_result(path, result_)
         # data.print_array(data.read_result(path))
 
         # 改进遗传算法
         print('improved genetic algorithm ' + str(index_))
         result_ = improved_ga(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
-        path = 'result/' + str(index_) + '_7_improved_genetic_algorithm.pkl'
+        path = 'result2/' + str(index_) + '_7_improved_genetic_algorithm.pkl'
         data.write_result(path, result_)
         # data.print_array(data.read_result(path))
 
@@ -1214,14 +1303,14 @@ if __name__ == '__main__':
         print('improved immune genetic algorithm ' + str(index_))
         result_ = improved_iga(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
         # print(result_)
-        path = 'result/' + str(index_) + '_8_immune_genetic_algorithm.pkl'
+        path = 'result2/' + str(index_) + '_8_improved_immune_genetic_algorithm.pkl'
         data.write_result(path, result_)
         # data.print_array(data.read_result(path))
 
         # 改进粒子群优化
         print('improved particle swarm optimization ' + str(index_))
         result_ = improved_pso(simulation_data, qos_total, max_iter=700)
-        path = 'result/' + str(index_) + '_9_particle_swarm_optimization.pkl'
+        path = 'result2/' + str(index_) + '_9_improved_particle_swarm_optimization.pkl'
         data.write_result(path, result_)
         # data.print_array(data.read_result(path))
 
@@ -1229,7 +1318,7 @@ if __name__ == '__main__':
         print('improved artificial bee colony ' + str(index_))
         result_ = improved_abc(simulation_data, qos_total)
         # print(result_)
-        path = 'result/' + str(index_) + '_10_artificial_bee_colony.pkl'
+        path = 'result2/' + str(index_) + '_10_improved_artificial_bee_colony.pkl'
         data.write_result(path, result_)
         # data.print_array(data.read_result(path))
 
