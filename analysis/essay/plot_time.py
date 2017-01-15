@@ -17,12 +17,12 @@ if __name__ == '__main__':
     data_set5 = []
     data_set6 = []
     for index in range(1, 21):
-        path1 = '../../result/' + str(index) + '_5_immune_genetic_algorithm.pkl'
-        path2 = '../../result/' + str(index) + '_6_hybrid_genetic_algorithm.pkl'
-        path3 = '../../result/' + str(index) + '_7_improved_genetic_algorithm.pkl'
-        path4 = '../../result/' + str(index) + '_8_improved_immune_genetic_algorithm.pkl'
-        path5 = '../../result/' + str(index) + '_9_improved_particle_swarm_optimization.pkl'
-        path6 = '../../result/' + str(index) + '_10_improved_artificial_bee_colony.pkl'
+        path1 = '../../result2/' + str(index) + '_5_immune_genetic_algorithm.pkl'
+        path2 = '../../result2/' + str(index) + '_6_hybrid_genetic_algorithm.pkl'
+        path3 = '../../result2/' + str(index) + '_7_improved_genetic_algorithm.pkl'
+        path4 = '../../result2/' + str(index) + '_8_improved_immune_genetic_algorithm.pkl'
+        path5 = '../../result2/' + str(index) + '_9_improved_particle_swarm_optimization.pkl'
+        path6 = '../../result2/' + str(index) + '_10_improved_artificial_bee_colony.pkl'
         data_set1.append(data.read_result(path1))
         data_set2.append(data.read_result(path2))
         data_set3.append(data.read_result(path3))
@@ -83,7 +83,6 @@ if __name__ == '__main__':
     # 获取改进粒子群算法的收敛用时
     time5 = []
     for cur in data_set5:
-        temp = list(reversed(cur))
         temp_val = temp[0][0]
         last = None
         for data in temp:
@@ -103,6 +102,11 @@ if __name__ == '__main__':
                 time6.append(last[2])
                 break
             last = data[:]
+
+    # temp = list(reversed(data_set6[0]))
+    # temp_val = temp[0][0]
+    # for cur in temp:
+    #     print(cur)
 
     # plt.title(u'20次试验中各算法的平均(收敛)用时')
 

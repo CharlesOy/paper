@@ -14,12 +14,12 @@ if __name__ == '__main__':
     data_set5 = []
     data_set6 = []
     for index in range(1, 21):
-        path1 = '../../result/' + str(index) + '_5_immune_genetic_algorithm.pkl'
-        path2 = '../../result/' + str(index) + '_6_hybrid_genetic_algorithm.pkl'
-        path3 = '../../result/' + str(index) + '_7_improved_genetic_algorithm.pkl'
-        path4 = '../../result/' + str(index) + '_8_improved_immune_genetic_algorithm.pkl'
-        path5 = '../../result/' + str(index) + '_9_improved_particle_swarm_optimization.pkl'
-        path6 = '../../result/' + str(index) + '_10_improved_artificial_bee_colony.pkl'
+        path1 = '../../result2/' + str(index) + '_5_immune_genetic_algorithm.pkl'
+        path2 = '../../result2/' + str(index) + '_6_hybrid_genetic_algorithm.pkl'
+        path3 = '../../result2/' + str(index) + '_7_improved_genetic_algorithm.pkl'
+        path4 = '../../result2/' + str(index) + '_8_improved_immune_genetic_algorithm.pkl'
+        path5 = '../../result2/' + str(index) + '_9_improved_particle_swarm_optimization.pkl'
+        path6 = '../../result2/' + str(index) + '_10_improved_artificial_bee_colony.pkl'
         data_set1.append(data.read_result(path1))
         data_set2.append(data.read_result(path2))
         data_set3.append(data.read_result(path3))

@@ -1245,7 +1245,7 @@ if __name__ == '__main__':
     t_begin_ = time.time()
     # 实验的种群大小
     population_size_ = 200
-    for index_ in range(1, 21):
+    for index_ in range(4, 5):
         # 生成初始种群(初始随机解)
         data.generate_population(simulation_data, population_size_)
 
@@ -1277,50 +1277,50 @@ if __name__ == '__main__':
         # data.write_result(path, result_)
         # # data.print_array(data.read_result(path))
 
-        # 免疫遗传算法
-        print('immune genetic algorithm ' + str(index_))
-        result_ = iga(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
-        path = 'result2/' + str(index_) + '_5_immune_genetic_algorithm.pkl'
-        data.write_result(path, result_)
-        # data.print_array(data.read_result(path))
+        # # 免疫遗传算法
+        # print('immune genetic algorithm ' + str(index_))
+        # result_ = iga(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
+        # path = 'result2/' + str(index_) + '_5_immune_genetic_algorithm.pkl'
+        # data.write_result(path, result_)
+        # # data.print_array(data.read_result(path))
 
-        # 混合免疫算法
-        # 混合免疫算法对生成初始种群采用了优化，不使用随机生成方法
-        print('hybrid genetic algorithm ' + str(index_))
-        result_ = hybrid_ga(simulation_data, qos_total, max_iter=100, threshold_mutate_prob=0.95)
-        path = 'result2/' + str(index_) + '_6_hybrid_genetic_algorithm.pkl'
-        data.write_result(path, result_)
-        # data.print_array(data.read_result(path))
+        # # 混合免疫算法
+        # # 混合免疫算法对生成初始种群采用了优化，不使用随机生成方法
+        # print('hybrid genetic algorithm ' + str(index_))
+        # result_ = hybrid_ga(simulation_data, qos_total, max_iter=100, threshold_mutate_prob=0.95)
+        # path = 'result2/' + str(index_) + '_6_hybrid_genetic_algorithm.pkl'
+        # data.write_result(path, result_)
+        # # data.print_array(data.read_result(path))
 
-        # 改进遗传算法
-        print('improved genetic algorithm ' + str(index_))
-        result_ = improved_ga(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
-        path = 'result2/' + str(index_) + '_7_improved_genetic_algorithm.pkl'
-        data.write_result(path, result_)
-        # data.print_array(data.read_result(path))
-
-        # 改进免疫算法
-        print('improved immune genetic algorithm ' + str(index_))
-        result_ = improved_iga(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
-        # print(result_)
-        path = 'result2/' + str(index_) + '_8_improved_immune_genetic_algorithm.pkl'
-        data.write_result(path, result_)
-        # data.print_array(data.read_result(path))
-
-        # 改进粒子群优化
-        print('improved particle swarm optimization ' + str(index_))
-        result_ = improved_pso(simulation_data, qos_total, max_iter=700)
-        path = 'result2/' + str(index_) + '_9_improved_particle_swarm_optimization.pkl'
-        data.write_result(path, result_)
-        # data.print_array(data.read_result(path))
-
-        # 改进人工蜂群算法
-        print('improved artificial bee colony ' + str(index_))
-        result_ = improved_abc(simulation_data, qos_total)
-        # print(result_)
-        path = 'result2/' + str(index_) + '_10_improved_artificial_bee_colony.pkl'
-        data.write_result(path, result_)
-        # data.print_array(data.read_result(path))
+        # # 改进遗传算法
+        # print('improved genetic algorithm ' + str(index_))
+        # result_ = improved_ga(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
+        # path = 'result2/' + str(index_) + '_7_improved_genetic_algorithm.pkl'
+        # data.write_result(path, result_)
+        # # data.print_array(data.read_result(path))
+        #
+        # # 改进免疫算法
+        # print('improved immune genetic algorithm ' + str(index_))
+        # result_ = improved_iga(simulation_data, qos_total, max_iter=100, mutate_prob=0.95, step=4)
+        # # print(result_)
+        # path = 'result2/' + str(index_) + '_8_improved_immune_genetic_algorithm.pkl'
+        # data.write_result(path, result_)
+        # # data.print_array(data.read_result(path))
+        #
+        # # 改进粒子群优化
+        # print('improved particle swarm optimization ' + str(index_))
+        # result_ = improved_pso(simulation_data, qos_total, max_iter=700)
+        # path = 'result2/' + str(index_) + '_9_improved_particle_swarm_optimization.pkl'
+        # data.write_result(path, result_)
+        # # data.print_array(data.read_result(path))
+        #
+        # # 改进人工蜂群算法
+        # print('improved artificial bee colony ' + str(index_))
+        # result_ = improved_abc(simulation_data, qos_total)
+        # # print(result_)
+        # path = 'result2/' + str(index_) + '_10_improved_artificial_bee_colony.pkl'
+        # data.write_result(path, result_)
+        # # data.print_array(data.read_result(path))
 
     # 总用时
     print(time.time() - t_begin_)
