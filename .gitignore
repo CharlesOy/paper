@@ -6,3 +6,4 @@ basic_data/
 *.pyc
 *.data
 *.pkl
+*.DS_Store
