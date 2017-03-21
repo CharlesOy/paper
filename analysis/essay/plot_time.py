@@ -9,14 +9,22 @@ matplotlib.rcParams.update({'font.size': 11})
 mpl.rcParams['font.sans-serif'] = ['FangSong']  # 指定默认字体
 mpl.rcParams['axes.unicode_minus'] = False
 
+# PSO的实验12有问题，重新做——20170321
+
 if __name__ == '__main__':
+    # 实验一共多少次
+    # included
+    t_from = 14
+    # not included
+    t_to = 15
+
     data_set1 = []
     data_set2 = []
     data_set3 = []
     data_set4 = []
     data_set5 = []
     data_set6 = []
-    for index in range(1, 21):
+    for index in range(t_from, t_to):
         path1 = '../../result2/' + str(index) + '_5_immune_genetic_algorithm.pkl'
         path2 = '../../result2/' + str(index) + '_6_hybrid_genetic_algorithm.pkl'
         path3 = '../../result2/' + str(index) + '_7_improved_genetic_algorithm.pkl'
@@ -83,6 +91,7 @@ if __name__ == '__main__':
     # 获取改进粒子群算法的收敛用时
     time5 = []
     for cur in data_set5:
+        temp = list(reversed(cur))
         temp_val = temp[0][0]
         last = None
         for data in temp:
@@ -113,12 +122,18 @@ if __name__ == '__main__':
     # x坐标数组,y坐标数组,形状
     # plt.plot([x for x in range(1, 21)], [data_set1[y][2] for y in range(0, 20)], '<-', label=u'Random Search')
     # plt.plot([x for x in range(1, 21)], [data_set2[y][2] for y in range(0, 20)], '>-', label=u'Hill Climbing')
-    plt.plot([x for x in range(1, 21)], time1, 's-', label=u'IGA')
-    plt.plot([x for x in range(1, 21)], time2, 'p-', label=u'Hybrid IGA')
-    plt.plot([x for x in range(1, 21)], time3, 'o-', label=u'Improved GA')
-    plt.plot([x for x in range(1, 21)], time4, 'd-', label=u'Improved IGA')
-    plt.plot([x for x in range(1, 21)], time5, '>-', label=u'Improved PSO')
-    plt.plot([x for x in range(1, 21)], time6, 'v-', label=u'Improved ABC')
+    # print(len(time1))
+    # print(len(time2))
+    # print(len(time3))
+    # print(len(time4))
+    # print(len(time5))
+    # print(len(time6))
+    plt.plot([x for x in range(t_from, t_to)], time1, 's-', label=u'IGA')
+    plt.plot([x for x in range(t_from, t_to)], time2, 'p-', label=u'Hybrid IGA')
+    plt.plot([x for x in range(t_from, t_to)], time3, 'o-', label=u'Improved GA')
+    plt.plot([x for x in range(t_from, t_to)], time4, 'd-', label=u'Improved IGA')
+    plt.plot([x for x in range(t_from, t_to)], time5, '>-', label=u'Improved PSO')
+    plt.plot([x for x in range(t_from, t_to)], time6, 'v-', label=u'Improved ABC')
     # x轴范围,y轴范围
     plt.axis([1, 20, 0, 1000])
     # y轴文字

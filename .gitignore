@@ -1,6 +1,7 @@
 .idea
 __pycache__/
 result/
+result2/
 basic_data/
 
 *.pyc
