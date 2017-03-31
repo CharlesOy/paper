@@ -1248,7 +1248,7 @@ if __name__ == '__main__':
     t_begin_ = time.time()
     # 实验的种群大小
     population_size_ = 200
-    for index_ in range(2, 21):
+    for index_ in range(20, 21):
         # 生成初始种群(初始随机解)
         data.generate_population(simulation_data, population_size_)
 

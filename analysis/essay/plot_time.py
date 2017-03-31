@@ -14,9 +14,9 @@ mpl.rcParams['axes.unicode_minus'] = False
 if __name__ == '__main__':
     # 实验一共多少次
     # included
-    t_from = 14
+    t_from = 1
     # not included
-    t_to = 15
+    t_to = 21
 
     data_set1 = []
     data_set2 = []
